@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ room.name }} の予約{% endblock %}
+
+{% block content %}
+<h1>{{ room.name }} の予約</h1>
+<form method="post">
+  {{ form.as_p }}
+  {% csrf_token %}
+  <button type="submit">送信</button>
+</form>
+{% endblock %}

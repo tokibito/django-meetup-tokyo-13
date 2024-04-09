@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }} さんの予約{% endblock %}
+
+{% block content %}
+<h1>{{ user.username }} さんの予約</h1>
+<ul>
+  {% for reservation in object_list %}
+  <li>
+    {{ reservation.room.name }}
+    （{{ reservation.start }} - {{ reservation.end }}）
+  </li>
+  {% endfor %}
+{% endblock %}

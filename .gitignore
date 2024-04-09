@@ -1,0 +1,6 @@
+venv/
+.ruff_cache/
+*.pyc
+*.sqlite3
+__pycache__/
+build/
