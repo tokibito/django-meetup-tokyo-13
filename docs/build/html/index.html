@@ -1,0 +1,362 @@
+
+
+<!doctype html>
+
+<html lang="ja" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>DjangoMeetupTokyo #13 中級者向けハンズオン &#8212; django-meetup-tokyo-13  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=649a27d8" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=532c1bf3" />
+    
+    <script src="_static/documentation_options.js?v=c033477b"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/translations.js?v=4dbe4bdc"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="検索" href="search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="#">django-meetup-tokyo-13  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">DjangoMeetupTokyo #13 中級者向けハンズオン</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="djangomeetuptokyo-13">
+<h1>DjangoMeetupTokyo #13 中級者向けハンズオン<a class="headerlink" href="#djangomeetuptokyo-13" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>イベント概要<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://django.connpass.com/event/312782/">https://django.connpass.com/event/312782/</a></p>
+</section>
+<section id="id2">
+<h2>中級者向けハンズオンについて<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>チュートリアルは理解できている、Djangoは使ったことあるけど、使いこなせてない～という人向けのハンズオンです。 用意した資料を見ながら課題を実装していきます。</p>
+<p>会議室予約システムの実装を通じて、Djangoの認証機能、ユーザー機能などの使い方を学びます。</p>
+</section>
+<section id="id3">
+<h2>作業環境の準備<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Python 3.12（Python3.10以上）</dt><dd><ul>
+<li><p>venvモジュールが使える状態にしてください。Ubuntuなどの環境では <code class="docutils literal notranslate"><span class="pre">python3.12-venv</span></code> のようなパッケージを入れる必要があるかもしれません。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">python3.12</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">venv</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Django 5.0系（最新 5.0.4）</dt><dd><ul>
+<li><p>venv環境にインストールしておいてください。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>VisualStudioCodeまたは、使い慣れたエディター</dt><dd><ul>
+<li><p>Python, Djangoで開発できる状態にしておいてください。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>このハンズオンの完成形のコード<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<p>GitHub上に完成形のコードがあります。コードを書き進めていて、うまく動かない場合に参考にしてみてください。</p>
+<p><a class="reference external" href="https://github.com/tokibito/django-meetup-tokyo-13/">https://github.com/tokibito/django-meetup-tokyo-13/</a></p>
+</section>
+<section id="id5">
+<h2>資料<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://tokibito.github.io/django-meetup-tokyo-13/">https://tokibito.github.io/django-meetup-tokyo-13/</a></p>
+</section>
+<section id="id6">
+<h2>作成するアプリケーションについて<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<p>会議室の予約システムを想定したアプリケーションを作成します。</p>
+<section id="id7">
+<h3>ユーザーの種別<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<p>このシステムを利用するユーザーの種別は以下の３種類を想定します。</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>一般ユーザー <cite>user_type:general</cite></dt><dd><ul>
+<li><p>一般ユーザーが利用可能な会議室を予約できます。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>特別ユーザー <cite>user_type:special</cite></dt><dd><ul>
+<li><p>一般ユーザーが利用可能な会議室に加えて、特別ユーザーが利用可能な会議室を予約できます。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>管理者ユーザー <cite>user_type:superuser</cite></dt><dd><ul>
+<li><p>管理者ユーザーのみが利用できる会議室を含む、すべての会議室を予約できます。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="id8">
+<h3>会議室一覧<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>利用可能な会議室の一覧を表示します。ログインしていない場合でも閲覧できるページです。</p>
+<p>ログインしている場合は、会議室の予約フォームへのリンクが表示されます。</p>
+</section>
+<section id="id9">
+<h3>ログイン<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<p>ユーザーアカウントを使ってログインします。</p>
+</section>
+<section id="id10">
+<h3>ログアウト<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<p>ログイン中のユーザーをログアウトします。</p>
+</section>
+<section id="id11">
+<h3>予約フォーム<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<p>ログイン中のユーザーで、会議室を予約します。</p>
+</section>
+<section id="id12">
+<h3>自分の予約一覧<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<p>ログイン中のユーザーの予約の一覧を表示します。</p>
+</section>
+<section id="id13">
+<h3>ユーザー登録<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<p>ユーザー登録をする画面です。</p>
+</section>
+</section>
+<section id="id14">
+<h2>プロジェクトの作成とセットアップ<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<section id="django">
+<h3>Djangoのプロジェクト作成<a class="headerlink" href="#django" title="Link to this heading">¶</a></h3>
+<p>今回は <code class="docutils literal notranslate"><span class="pre">myproject</span></code> という名前のプロジェクトで作成します。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ django-admin startproject myproject
+(venv)$ cd myproject
+</pre></div>
+</div>
+<p><strong>以降の説明は、このmyprojectディレクトリ以下を起点とします。</strong></p>
+</section>
+<section id="id15">
+<h3>管理者ユーザーの作成<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<p>Django管理サイト用のユーザーを作成しておきます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py createsuperuser
+</pre></div>
+</div>
+</section>
+<section id="django-debug-toolbar">
+<h3>django-debug-toolbarのセットアップ<a class="headerlink" href="#django-debug-toolbar" title="Link to this heading">¶</a></h3>
+<p>django-debug-toolbarをインストール、セットアップしておきます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ pip install django-debug-toolbar
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://django-debug-toolbar.readthedocs.io/en/latest/">django-debug-toolbar</a></p></li>
+<li><p><a class="reference external" href="https://docs.djangoproject.com/ja/5.0/intro/tutorial08/">はじめてのDjangoアプリ作成、その8 | Django ドキュメント</a></p></li>
+</ul>
+</div>
+<p>myproject/settings.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ...</span>
+    <span class="s2">&quot;debug_toolbar&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INTERNAL_IPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MIDDLEWARE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;debug_toolbar.middleware.DebugToolbarMiddleware&quot;</span><span class="p">,</span>
+    <span class="c1"># ...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">DebugToolbarMiddleware</span></code> は、なるべく外側に配置したほうがよいとドキュメントに書かれています。
+GZipMiddlewareのように、レスポンスボディを加工するミドルウェアを使っている場合は、それよりも後に配置する必要があります。
+DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む処理を行っているためです。</p>
+</div>
+<p>myproject/urls.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">include</span><span class="p">,</span> <span class="n">path</span>  <span class="c1"># includeを追加しています</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ...</span>
+    <span class="n">path</span><span class="p">(</span><span class="s2">&quot;__debug__/&quot;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s2">&quot;debug_toolbar.urls&quot;</span><span class="p">)),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>これでdjango-debug-toolbarのセットアップまで完了です。初回のDBマイグレーションとrunserverで動作確認してください。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py migrate
+(venv)$ python manage.py runserver
+</pre></div>
+</div>
+<p><a class="reference external" href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a> をブラウザで開いて確認します。</p>
+</section>
+</section>
+<section id="reservation">
+<h2>reservationアプリケーションを作成<a class="headerlink" href="#reservation" title="Link to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py startapp reservation
+</pre></div>
+</div>
+<p>myproject/settings.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ...</span>
+    <span class="s2">&quot;reservation&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>TODO: ...</p>
+</section>
+<section id="id17">
+<h2>追加課題<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<p>時間に余裕のある人向けの追加課題です。</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>ログイン中のユーザーのパスワードを変更する画面を作る</dt><dd><ul>
+<li><p>パスワード変更を行う画面（フォーム）を作ってみましょう。</p></li>
+<li><p>パスワードを変更するAPIがあります。</p></li>
+<li><p><a class="reference external" href="https://docs.djangoproject.com/ja/5.0/topics/auth/default/#changing-passwords">https://docs.djangoproject.com/ja/5.0/topics/auth/default/#changing-passwords</a></p></li>
+<li><p>もしくは、 <cite>django.contrib.auth.forms.PasswordChangeForm</cite> や <cite>django.contrib.auth.views.PasswordChangeView</cite> を利用することもできます。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ユーザー登録にメールアドレスの確認を必須とする</dt><dd><ul>
+<li><p>メールアドレスを登録していない場合、パスワードリセット等で困る場合があります。</p></li>
+<li><dl class="simple">
+<dt>django-registrationを使って実装することもできます。</dt><dd><ul>
+<li><p><a class="reference external" href="https://pypi.org/project/django-registration/">https://pypi.org/project/django-registration/</a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>パスワードリセット画面を実装する</dt><dd><ul>
+<li><p>「パスワードを忘れてしまった場合」に対応する画面を作ってみましょう。</p></li>
+<li><p>メールを送信して、メールに書かれたURLからパスワードを設定する画面を造ります。</p></li>
+<li><p>または、 <cite>django.contrib.auth.views.PasswordResetView</cite> を利用することもできます。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>指定のユーザーに成り代わってログインする</dt><dd><ul>
+<li><p>Djangoの管理画面から特定のユーザーに成り代わってログインをする機能が欲しい場合、django-hijackを利用できます。試してみましょう。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>外部の認証プロバイダーによるログインを実現する</dt><dd><ul>
+<li><p>django-allauthを使うと、XやGoogle、Facebookなどのアカウントを使ったログインを実現できます。</p></li>
+<li><p>SNS等の場合は、OAuthというプロトコルで外部の認証プロバイダーを利用できます。認証プロトコルはOAuth以外にSAMLなどがあります。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="#">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">DjangoMeetupTokyo #13 中級者向けハンズオン</a><ul>
+<li><a class="reference internal" href="#id1">イベント概要</a></li>
+<li><a class="reference internal" href="#id2">中級者向けハンズオンについて</a></li>
+<li><a class="reference internal" href="#id3">作業環境の準備</a></li>
+<li><a class="reference internal" href="#id4">このハンズオンの完成形のコード</a></li>
+<li><a class="reference internal" href="#id5">資料</a></li>
+<li><a class="reference internal" href="#id6">作成するアプリケーションについて</a><ul>
+<li><a class="reference internal" href="#id7">ユーザーの種別</a></li>
+<li><a class="reference internal" href="#id8">会議室一覧</a></li>
+<li><a class="reference internal" href="#id9">ログイン</a></li>
+<li><a class="reference internal" href="#id10">ログアウト</a></li>
+<li><a class="reference internal" href="#id11">予約フォーム</a></li>
+<li><a class="reference internal" href="#id12">自分の予約一覧</a></li>
+<li><a class="reference internal" href="#id13">ユーザー登録</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id14">プロジェクトの作成とセットアップ</a><ul>
+<li><a class="reference internal" href="#django">Djangoのプロジェクト作成</a></li>
+<li><a class="reference internal" href="#id15">管理者ユーザーの作成</a></li>
+<li><a class="reference internal" href="#django-debug-toolbar">django-debug-toolbarのセットアップ</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reservation">reservationアプリケーションを作成</a></li>
+<li><a class="reference internal" href="#id17">追加課題</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="#">django-meetup-tokyo-13  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">DjangoMeetupTokyo #13 中級者向けハンズオン</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; 著作権 2024, Shinya Okano.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>
