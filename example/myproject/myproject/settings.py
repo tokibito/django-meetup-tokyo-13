@@ -127,3 +127,12 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ログインページのURL
+LOGIN_URL = "login"
+# ログイン後の遷移先のURL
+LOGIN_REDIRECT_URL = "index"
+# ログアウト処理のURL
+LOGOUT_URL = "logout"
+# ログアウト後の遷移先のURL
+LOGOUT_REDIRECT_URL = "login"

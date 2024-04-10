@@ -3,10 +3,17 @@
 {% block title %}部屋一覧{% endblock %}
 
 {% block content %}
-  <h1>部屋一覧</h1>
-  <ul>
-    {% for room in object_list %}
-      <li>{{ room.name }} <a href="{% url "reservation" room_id=room.id %}">予約する</li>
-    {% endfor %}
-  </ul>
+<h1>部屋一覧</h1>
+<ul>
+  {% for room in object_list %}
+    <li>{{ room.name }} <a href="{% url "reservation" room_id=room.id %}">予約する</a></li>
+  {% endfor %}
+</ul>
+<div>
+  <a href="{% url "my_reservation" %}">自分の予約一覧</a>
+</div>
+<form action="{% url "logout" %}" method="post">
+  {% csrf_token %}
+  <button type="submit">ログアウト</button>
+</form>
 {% endblock %}
