@@ -7,9 +7,11 @@ from django.views import generic
 from . import models
 from . import forms
 
+
 class RoomListView(generic.ListView):
     model = models.Room
     template_name = "reservation/index.html"
+
 
 class ReservationView(generic.CreateView, LoginRequiredMixin):
     model = models.Reservation
@@ -30,6 +32,7 @@ class ReservationView(generic.CreateView, LoginRequiredMixin):
         instance.room = self.room
         instance.user = self.request.user
         return super().form_valid(form)
+
 
 class MyReservationListView(generic.ListView, LoginRequiredMixin):
     model = models.Reservation

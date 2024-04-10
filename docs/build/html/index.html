@@ -94,22 +94,15 @@
 <p>このシステムを利用するユーザーの種別は以下の３種類を想定します。</p>
 <ul class="simple">
 <li><dl class="simple">
-<dt>一般ユーザー <cite>user_type:general</cite></dt><dd><ul>
+<dt>一般ユーザー <cite>UserType:1:normal</cite></dt><dd><ul>
 <li><p>一般ユーザーが利用可能な会議室を予約できます。</p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>特別ユーザー <cite>user_type:special</cite></dt><dd><ul>
-<li><p>一般ユーザーが利用可能な会議室に加えて、特別ユーザーが利用可能な会議室を予約できます。</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>管理者ユーザー <cite>user_type:superuser</cite></dt><dd><ul>
-<li><p>管理者ユーザーのみが利用できる会議室を含む、すべての会議室を予約できます。</p></li>
+<dt>上級ユーザー <cite>UserType:2:advanced</cite></dt><dd><ul>
+<li><p>一般ユーザーが利用可能な会議室に加えて、上級ユーザーが利用可能な会議室を予約できます。</p></li>
 </ul>
 </dd>
 </dl>
@@ -132,6 +125,7 @@
 <section id="id11">
 <h3>予約フォーム<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
 <p>ログイン中のユーザーで、会議室を予約します。</p>
+<p>予約は、日付と日時を登録します。他の予約とのぶつかりはチェックしません。</p>
 </section>
 <section id="id12">
 <h3>自分の予約一覧<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>

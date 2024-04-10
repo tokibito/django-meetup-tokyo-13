@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="Room",
+            name="UserProfile",
             fields=[
                 (
                     "id",
@@ -25,45 +25,26 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("name", models.CharField(max_length=50)),
                 (
-                    "available_user_type",
+                    "user_type",
                     models.PositiveSmallIntegerField(
                         choices=[(1, "Normal"), (2, "Advanced")],
                         default=0,
-                        verbose_name="利用可能ユーザー種別",
+                        verbose_name="ユーザー種別",
                     ),
                 ),
-            ],
-        ),
-        migrations.CreateModel(
-            name="Reservation",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("start", models.DateTimeField()),
-                ("end", models.DateTimeField()),
                 (
                     "user",
-                    models.ForeignKey(
+                    models.OneToOneField(
                         on_delete=django.db.models.deletion.CASCADE,
                         to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
-                (
-                    "room",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="reservation.room",
+                        verbose_name="ユーザー",
                     ),
                 ),
             ],
+            options={
+                "verbose_name": "ユーザープロフィール",
+                "verbose_name_plural": "ユーザープロフィール",
+            },
         ),
     ]
