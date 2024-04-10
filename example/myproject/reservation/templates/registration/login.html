@@ -9,4 +9,7 @@
   {% csrf_token %}
   <button type="submit">ログイン</button>
 </form>
+<div>
+  <a href="{% url "register" %}">新規登録</a>
+</div>
 {% endblock %}
