@@ -673,17 +673,155 @@ reservation/forms.py:
 予約フォームを表示するビューを作成
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+reservation/views.py:
+
+.. code-block:: python
+
+   # ...
+   from django.urls import reverse_lazy
+   from django.shortcuts import get_object_or_404
+   from account import models as account_models
+   from . import forms
+
+   # ...
+
+   @method_decorator([login_required, user_profile_required], name="dispatch")
+   class ReservationView(generic.CreateView):
+       model = models.Reservation
+       template_name = "reservation/reservation.html"
+       form_class = forms.ReservationForm
+       success_url = reverse_lazy("my_reservation")
+
+       def get_context_data(self, **kwargs):
+           kwargs["room"] = self.room
+           return super().get_context_data(**kwargs)
+
+       def dispatch(self, request, room_id: int):
+           user_profile = self.request.user.user_profile
+           # ユーザー種別によって利用可能な部屋を絞り込む
+           if user_profile.user_type == account_models.UserType.NORMAL:
+               available_rooms = models.Room.objects.filter(
+                   available_user_type=account_models.UserType.NORMAL
+               )
+           else:
+               available_rooms = models.Room.objects.all()
+           self.room = get_object_or_404(available_rooms, pk=room_id)
+           return super().dispatch(request)
+
+       def form_valid(self, form):
+           instance = form.save(commit=False)
+           instance.room = self.room
+           instance.user = self.request.user
+           return super().form_valid(form)
+
+テンプレートの作成
+~~~~~~~~~~~~~~~~~~~~
+
+reservation/templates/reservation/reservation.html:
+
+.. code-block:: html+django
+
+   {% extends "base.html" %}
+
+   {% block title %}{{ room.name }} の予約{% endblock %}
+
+   {% block content %}
+   <h1>{{ room.name }} の予約</h1>
+   <form method="post">
+     {{ form.as_p }}
+     {% csrf_token %}
+     <button type="submit">送信</button>
+   </form>
+   {% endblock %}
+
 URLを追加
 ~~~~~~~~~~~~
+
+reservation/urls.py:
+
+.. code-block:: python
+
+   # ...
+   urlpatterns = [
+       # ...
+       path(
+           "reservation/<int:room_id>/",
+           views.ReservationView.as_view(),
+           name="reservation",
+       ),
+   ]
 
 予約フォームへのリンクを会議室一覧に追加
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ログイン中のユーザーの予約一覧
---------------------------------
+reservation/templates/reservation/index.html:
 
-ビューの実装
-~~~~~~~~~~~~~~~~~~
+.. code-block:: html+django
+
+   {% for room in object_list %}
+     <li>{{ room.name }} <a href="{% url "reservation" room_id=room.id %}">予約する</a></li>
+   {% endfor %}
+
+自分の予約一覧
+--------------------
+
+ビューとテンプレートの実装
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+reservation/views.py:
+
+.. code-block:: python
+
+   class MyReservationListView(generic.ListView, LoginRequiredMixin):
+       model = models.Reservation
+       template_name = "reservation/my_reservation_list.html"
+
+       def get_queryset(self):
+           return models.Reservation.objects.filter(user=self.request.user)
+
+reservation/templates/reservation/my_reservation_list.html:
+
+.. code-block:: html+django
+
+   {% extends "base.html" %}
+
+   {% block title %}{{ user.username }} さんの予約{% endblock %}
+
+   {% block content %}
+   <h1>{{ user.username }} さんの予約</h1>
+   <ul>
+     {% for reservation in object_list %}
+     <li>
+       {{ reservation.room.name }}
+       （{{ reservation.start }} - {{ reservation.end }}）
+     </li>
+     {% endfor %}
+   </ul>
+   <div>
+     <a href="{% url "index" %}">部屋一覧</a>
+   </div>
+   {% endblock %}
+
+URLを追加
+~~~~~~~~~~~~
+
+reservation/urls.py:
+
+.. code-block:: python
+
+   # ...
+   urlpatterns = [
+       # ...
+       path(
+           "my_reservation/", views.MyReservationListView.as_view(), name="my_reservation"
+       ),
+   ]
+
+ユーザー登録画面
+--------------------
+
+ビューとテンプレートの実装
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 URLを追加
 ~~~~~~~~~~~~

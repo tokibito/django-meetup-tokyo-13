@@ -1,6 +1,4 @@
-from typing import Any
 from django.urls import reverse_lazy
-from django.forms import BaseModelForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views import generic
@@ -36,7 +34,7 @@ class ReservationView(generic.CreateView):
     form_class = forms.ReservationForm
     success_url = reverse_lazy("my_reservation")
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+    def get_context_data(self, **kwargs):
         kwargs["room"] = self.room
         return super().get_context_data(**kwargs)
 
@@ -52,7 +50,7 @@ class ReservationView(generic.CreateView):
         self.room = get_object_or_404(available_rooms, pk=room_id)
         return super().dispatch(request)
 
-    def form_valid(self, form: BaseModelForm):
+    def form_valid(self, form):
         instance = form.save(commit=False)
         instance.room = self.room
         instance.user = self.request.user
@@ -63,5 +61,5 @@ class MyReservationListView(generic.ListView, LoginRequiredMixin):
     model = models.Reservation
     template_name = "reservation/my_reservation_list.html"
 
-    def get_queryset(self) -> Any:
+    def get_queryset(self):
         return models.Reservation.objects.filter(user=self.request.user)

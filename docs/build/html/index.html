@@ -636,25 +636,149 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </section>
 <section id="id34">
 <h3>予約フォームを表示するビューを作成<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
+<p>reservation/views.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
+<span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">reverse_lazy</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span> <span class="nn">account</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">account_models</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">forms</span>
+
+<span class="c1"># ...</span>
+
+<span class="nd">@method_decorator</span><span class="p">([</span><span class="n">login_required</span><span class="p">,</span> <span class="n">user_profile_required</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dispatch&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ReservationView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">CreateView</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Reservation</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/reservation.html&quot;</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ReservationForm</span>
+    <span class="n">success_url</span> <span class="o">=</span> <span class="n">reverse_lazy</span><span class="p">(</span><span class="s2">&quot;my_reservation&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;room&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">room</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">room_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">user_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">user_profile</span>
+        <span class="c1"># ユーザー種別によって利用可能な部屋を絞り込む</span>
+        <span class="k">if</span> <span class="n">user_profile</span><span class="o">.</span><span class="n">user_type</span> <span class="o">==</span> <span class="n">account_models</span><span class="o">.</span><span class="n">UserType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
+            <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">available_user_type</span><span class="o">=</span><span class="n">account_models</span><span class="o">.</span><span class="n">UserType</span><span class="o">.</span><span class="n">NORMAL</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">room</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">available_rooms</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">room_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">form_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">room</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">room</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 <section id="id35">
-<h3>URLを追加<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
+<h3>テンプレートの作成<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
+<p>reservation/templates/reservation/reservation.html:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span> <span class="cp">%}{{</span> <span class="nv">room.name</span> <span class="cp">}}</span> の予約<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}</span>
+<span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">room.name</span> <span class="cp">}}</span> の予約<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+  <span class="cp">{{</span> <span class="nv">form.as_p</span> <span class="cp">}}</span>
+  <span class="cp">{%</span> <span class="k">csrf_token</span> <span class="cp">%}</span>
+  <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>送信<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+</pre></div>
+</div>
 </section>
 <section id="id36">
-<h3>予約フォームへのリンクを会議室一覧に追加<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
-</section>
+<h3>URLを追加<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
+<p>reservation/urls.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ...</span>
+    <span class="n">path</span><span class="p">(</span>
+        <span class="s2">&quot;reservation/&lt;int:room_id&gt;/&quot;</span><span class="p">,</span>
+        <span class="n">views</span><span class="o">.</span><span class="n">ReservationView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;reservation&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
 </section>
 <section id="id37">
-<h2>ログイン中のユーザーの予約一覧<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h2>
+<h3>予約フォームへのリンクを会議室一覧に追加<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
+<p>reservation/templates/reservation/index.html:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">room</span> <span class="k">in</span> <span class="nv">object_list</span> <span class="cp">%}</span>
+  <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">room.name</span> <span class="cp">}}</span> <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s2">&quot;reservation&quot;</span> <span class="nv">room_id</span><span class="o">=</span><span class="nv">room.id</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span>予約する<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+</section>
+</section>
 <section id="id38">
-<h3>ビューの実装<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h3>
-</section>
+<h2>自分の予約一覧<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h2>
 <section id="id39">
-<h3>URLを追加<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
-</section>
+<h3>ビューとテンプレートの実装<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
+<p>reservation/views.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyReservationListView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">,</span> <span class="n">LoginRequiredMixin</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Reservation</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/my_reservation_list.html&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">models</span><span class="o">.</span><span class="n">Reservation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>reservation/templates/reservation/my_reservation_list.html:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span> <span class="cp">%}{{</span> <span class="nv">user.username</span> <span class="cp">}}</span> さんの予約<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}</span>
+<span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">user.username</span> <span class="cp">}}</span> さんの予約<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">for</span> <span class="nv">reservation</span> <span class="k">in</span> <span class="nv">object_list</span> <span class="cp">%}</span>
+  <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">reservation.room.name</span> <span class="cp">}}</span>
+    （<span class="cp">{{</span> <span class="nv">reservation.start</span> <span class="cp">}}</span> - <span class="cp">{{</span> <span class="nv">reservation.end</span> <span class="cp">}}</span>）
+  <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s2">&quot;index&quot;</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span>部屋一覧<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+</pre></div>
+</div>
 </section>
 <section id="id40">
-<h2>追加課題<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h2>
+<h3>URLを追加<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h3>
+<p>reservation/urls.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ...</span>
+    <span class="n">path</span><span class="p">(</span>
+        <span class="s2">&quot;my_reservation/&quot;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">MyReservationListView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_reservation&quot;</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id41">
+<h2>ユーザー登録画面<a class="headerlink" href="#id41" title="Link to this heading">¶</a></h2>
+<section id="id42">
+<h3>ビューとテンプレートの実装<a class="headerlink" href="#id42" title="Link to this heading">¶</a></h3>
+</section>
+<section id="id43">
+<h3>URLを追加<a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
+</section>
+</section>
+<section id="id44">
+<h2>追加課題<a class="headerlink" href="#id44" title="Link to this heading">¶</a></h2>
 <p>時間に余裕のある人向けの追加課題です。</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -767,16 +891,22 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <li><a class="reference internal" href="#id32">予約フォームを作成する</a><ul>
 <li><a class="reference internal" href="#id33">フォームの定義</a></li>
 <li><a class="reference internal" href="#id34">予約フォームを表示するビューを作成</a></li>
-<li><a class="reference internal" href="#id35">URLを追加</a></li>
-<li><a class="reference internal" href="#id36">予約フォームへのリンクを会議室一覧に追加</a></li>
+<li><a class="reference internal" href="#id35">テンプレートの作成</a></li>
+<li><a class="reference internal" href="#id36">URLを追加</a></li>
+<li><a class="reference internal" href="#id37">予約フォームへのリンクを会議室一覧に追加</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id37">ログイン中のユーザーの予約一覧</a><ul>
-<li><a class="reference internal" href="#id38">ビューの実装</a></li>
-<li><a class="reference internal" href="#id39">URLを追加</a></li>
+<li><a class="reference internal" href="#id38">自分の予約一覧</a><ul>
+<li><a class="reference internal" href="#id39">ビューとテンプレートの実装</a></li>
+<li><a class="reference internal" href="#id40">URLを追加</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id40">追加課題</a></li>
+<li><a class="reference internal" href="#id41">ユーザー登録画面</a><ul>
+<li><a class="reference internal" href="#id42">ビューとテンプレートの実装</a></li>
+<li><a class="reference internal" href="#id43">URLを追加</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id44">追加課題</a></li>
 </ul>
 </li>
 </ul>
