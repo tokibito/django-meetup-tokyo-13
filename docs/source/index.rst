@@ -373,6 +373,62 @@ reservation/views.py:
            available_rooms = models.Room.objects.all()
            return available_rooms
 
+RoomListViewをurls.pyに登録します。
+
+reservation/urls.py:
+
+.. code-block:: python
+
+   from django.urls import path
+   from . import views
+
+   urlpatterns = [
+       path("", views.RoomListView.as_view(), name="index"),
+   ]
+
+reservation/urls.pyをmyproject/urls.pyに登録します。
+
+myproject/urls.py:
+
+.. code-block:: python
+
+   from django.urls import include, path
+
+   urlpatterns = [
+       # ...
+       path("reservation/", include("reservation.urls")),
+   ]
+
+reservation/templates/base.html:
+
+.. code-block:: html+django
+
+   <html>
+   <head>
+     <title>{% block title %}{% endblock %}</title>
+   </head>
+   <body>
+     {% block content %}{% endblock %}
+   </body>
+
+reservation/templates/reservation/index.html:
+
+.. code-block:: html+django
+
+   {% extends "base.html" %}
+
+   {% block title %}{{ room.name }} の予約{% endblock %}
+
+   {% block content %}
+   <h1>{{ room.name }} の予約</h1>
+   <form method="post">
+     {{ form.as_p }}
+     {% csrf_token %}
+     <button type="submit">送信</button>
+   </form>
+   {% endblock %}
+
+
 TODO: ...
 
 
