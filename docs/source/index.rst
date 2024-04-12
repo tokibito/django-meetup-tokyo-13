@@ -417,17 +417,83 @@ reservation/templates/reservation/index.html:
 
    {% extends "base.html" %}
 
-   {% block title %}{{ room.name }} の予約{% endblock %}
+   {% block title %}部屋一覧{% endblock %}
 
    {% block content %}
-   <h1>{{ room.name }} の予約</h1>
+   <h1>部屋一覧</h1>
+   <ul>
+     {% for room in object_list %}
+       <li>{{ room.name }}</li>
+     {% endfor %}
+   </ul>
+   {% endblock %}
+
+ログイン・ログアウト処理を作成
+----------------------------------------
+
+ログイン画面は、 ``django.contrib.auth.views.LoginView`` を利用できます。
+ログアウト処理（表示するページは無し）は、 ``django.contrib.auth.views.LogoutView`` を利用できます。
+
+account/urls.py:
+
+.. code-block:: python
+
+   from django.urls import path
+   from django.contrib.auth import views as auth_views
+
+   urlpatterns = [
+       path("login/", auth_views.LoginView.as_view(), name="login"),
+       path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+   ]
+
+LoginViewのデフォルトテンプレートはregistration/login.htmlです。
+
+account/templates/registration/login.html:
+
+.. code-block:: html+django
+
+   {% extends "base.html" %}
+
+   {% block title %}ログイン{% endblock %}
+
+   {% block content %}
+   <h1>ログイン</h1>
    <form method="post">
-     {{ form.as_p }}
      {% csrf_token %}
-     <button type="submit">送信</button>
+     {{ form.as_p }}
+     <button type="submit">ログイン</button>
    </form>
    {% endblock %}
 
+myproject/urls.py:
+
+.. code-block:: python
+
+   from django.urls import include, path
+
+   urlpatterns = [
+       # ...
+       path("account/", include("account.urls")),
+   ]
+
+ログイン画面のURL、ログアウト処理のURLは ``settings.py`` で設定します。また、ログイン後、ログアウト後の遷移先のURLも設定します。
+
+myproject/settings.py:
+
+.. code-block:: python
+
+   # ログインページのURL
+   LOGIN_URL = "login"
+   # ログイン後の遷移先のURL
+   LOGIN_REDIRECT_URL = "index"
+   # ログアウト処理のURL
+   LOGOUT_URL = "logout"
+   # ログアウト後の遷移先のURL
+   LOGOUT_REDIRECT_URL = "login"
+
+.. note::
+
+   このURLの設定はパスを指定するか、URL nameを指定するかのどちらかです。
 
 TODO: ...
 

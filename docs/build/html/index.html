@@ -412,22 +412,78 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p>reservation/templates/reservation/index.html:</p>
 <div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span>
 
-<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span> <span class="cp">%}{{</span> <span class="nv">room.name</span> <span class="cp">}}</span> の予約<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span> <span class="cp">%}</span>部屋一覧<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 
 <span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}</span>
-<span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">room.name</span> <span class="cp">}}</span> の予約<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>部屋一覧<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">for</span> <span class="nv">room</span> <span class="k">in</span> <span class="nv">object_list</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">room.name</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="id26">
+<h2>ログイン・ログアウト処理を作成<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
+<p>ログイン画面は、 <code class="docutils literal notranslate"><span class="pre">django.contrib.auth.views.LoginView</span></code> を利用できます。
+ログアウト処理（表示するページは無し）は、 <code class="docutils literal notranslate"><span class="pre">django.contrib.auth.views.LogoutView</span></code> を利用できます。</p>
+<p>account/urls.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">views</span> <span class="k">as</span> <span class="n">auth_views</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">path</span><span class="p">(</span><span class="s2">&quot;login/&quot;</span><span class="p">,</span> <span class="n">auth_views</span><span class="o">.</span><span class="n">LoginView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;login&quot;</span><span class="p">),</span>
+    <span class="n">path</span><span class="p">(</span><span class="s2">&quot;logout/&quot;</span><span class="p">,</span> <span class="n">auth_views</span><span class="o">.</span><span class="n">LogoutView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;logout&quot;</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>LoginViewのデフォルトテンプレートはregistration/login.htmlです。</p>
+<p>account/templates/registration/login.html:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span> <span class="cp">%}</span>ログイン<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}</span>
+<span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>ログイン<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
-  <span class="cp">{{</span> <span class="nv">form.as_p</span> <span class="cp">}}</span>
   <span class="cp">{%</span> <span class="k">csrf_token</span> <span class="cp">%}</span>
-  <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>送信<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+  <span class="cp">{{</span> <span class="nv">form.as_p</span> <span class="cp">}}</span>
+  <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>ログイン<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
 <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
 <span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </pre></div>
 </div>
+<p>myproject/urls.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">include</span><span class="p">,</span> <span class="n">path</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ...</span>
+    <span class="n">path</span><span class="p">(</span><span class="s2">&quot;account/&quot;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s2">&quot;account.urls&quot;</span><span class="p">)),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>ログイン画面のURL、ログアウト処理のURLは <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> で設定します。また、ログイン後、ログアウト後の遷移先のURLも設定します。</p>
+<p>myproject/settings.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ログインページのURL</span>
+<span class="n">LOGIN_URL</span> <span class="o">=</span> <span class="s2">&quot;login&quot;</span>
+<span class="c1"># ログイン後の遷移先のURL</span>
+<span class="n">LOGIN_REDIRECT_URL</span> <span class="o">=</span> <span class="s2">&quot;index&quot;</span>
+<span class="c1"># ログアウト処理のURL</span>
+<span class="n">LOGOUT_URL</span> <span class="o">=</span> <span class="s2">&quot;logout&quot;</span>
+<span class="c1"># ログアウト後の遷移先のURL</span>
+<span class="n">LOGOUT_REDIRECT_URL</span> <span class="o">=</span> <span class="s2">&quot;login&quot;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>このURLの設定はパスを指定するか、URL nameを指定するかのどちらかです。</p>
+</div>
 <p>TODO: ...</p>
 </section>
-<section id="id26">
-<h2>追加課題<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
+<section id="id27">
+<h2>追加課題<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h2>
 <p>時間に余裕のある人向けの追加課題です。</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -528,7 +584,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </ul>
 </li>
 <li><a class="reference internal" href="#id25">会議室一覧ページを作成</a></li>
-<li><a class="reference internal" href="#id26">追加課題</a></li>
+<li><a class="reference internal" href="#id26">ログイン・ログアウト処理を作成</a></li>
+<li><a class="reference internal" href="#id27">追加課題</a></li>
 </ul>
 </li>
 </ul>
