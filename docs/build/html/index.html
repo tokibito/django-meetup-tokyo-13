@@ -429,6 +429,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <h2>ログイン・ログアウト処理を作成<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
 <p>ログイン画面は、 <code class="docutils literal notranslate"><span class="pre">django.contrib.auth.views.LoginView</span></code> を利用できます。
 ログアウト処理（表示するページは無し）は、 <code class="docutils literal notranslate"><span class="pre">django.contrib.auth.views.LogoutView</span></code> を利用できます。</p>
+<section id="url">
+<h3>ビューを利用するURLの追加<a class="headerlink" href="#url" title="Link to this heading">¶</a></h3>
 <p>account/urls.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">path</span>
 <span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">views</span> <span class="k">as</span> <span class="n">auth_views</span>
@@ -455,6 +457,9 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </pre></div>
 </div>
+</section>
+<section id="id27">
+<h3>プロジェクトのURLに追加<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
 <p>myproject/urls.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">include</span><span class="p">,</span> <span class="n">path</span>
 
@@ -464,8 +469,9 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="p">]</span>
 </pre></div>
 </div>
-<section id="id27">
-<h3>ログイン・ログアウトに関する設定<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+</section>
+<section id="id28">
+<h3>ログイン・ログアウトに関する設定<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
 <p>ログイン画面のURL、ログアウト処理のURLは <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> で設定します。また、ログイン後、ログアウト後の遷移先のURLも設定します。</p>
 <p>myproject/settings.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ログインページのURL</span>
@@ -483,8 +489,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p>このURLの設定はパスを指定するか、URL nameを指定するかのどちらかです。</p>
 </div>
 </section>
-<section id="id28">
-<h3>ログアウトのボタンを設置する<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<section id="id29">
+<h3>ログアウトのボタンを設置する<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
 <p>base.htmlのcontentブロックの後ろに、ログアウトボタンを設置します。</p>
 <p>reservation/templates/base.html:</p>
 <div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
@@ -506,8 +512,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </div>
 </section>
 </section>
-<section id="id29">
-<h2>会議室一覧をログインユーザーのみに制限<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h2>
+<section id="id30">
+<h2>会議室一覧をログインユーザーのみに制限<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
 <p>Viewクラスに対して、ログインを必須としたい場合、LoginRequiredMixinを多重継承で利用します。</p>
 <p>account/views.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.mixins</span> <span class="kn">import</span> <span class="n">LoginRequiredMixin</span>
@@ -530,9 +536,9 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p>これで、会議室一覧にアクセスするためにはログインが必要になります。
 ログインしていない場合は、ログイン画面にリダイレクトされます。</p>
 </section>
-<section id="id30">
-<h2>会議室一覧で会員種別による表示制御<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
-<p>ログインユーザーの会員種別によって、表示する会議室を制御します。</p>
+<section id="id31">
+<h2>会議室一覧でユーザー種別による表示制御<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h2>
+<p>ログインユーザーのユーザー種別によって、表示する会議室を制御します。</p>
 <p>ログインユーザーのユーザープロフィールを取得する関数を作成します。</p>
 <p>account/models.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
@@ -601,10 +607,54 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p class="admonition-title">注釈</p>
 <p>Viewクラスは、dispatchメソッドを持っています。dispatchメソッドは、リクエストを処理する前に、各種の処理を行うためのメソッドです。</p>
 </div>
-<p>TODO: ...</p>
 </section>
-<section id="id31">
-<h2>追加課題<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h2>
+<section id="id32">
+<h2>予約フォームを作成する<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h2>
+<section id="id33">
+<h3>フォームの定義<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
+<p>予約データを作成するフォームは、 <code class="docutils literal notranslate"><span class="pre">forms.ModelForm</span></code> を使います。</p>
+<p>reservation/forms.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">models</span>
+
+
+<span class="k">class</span> <span class="nc">ReservationForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Reservation</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">]</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateTimeInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;datetime-local&quot;</span><span class="p">}),</span>
+            <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateTimeInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;datetime-local&quot;</span><span class="p">}),</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">DateTimeInput</span></code> は日時の入力を受け付けるウィジェットです。閲覧したブラウザのローカル日時を使用したブラウザの日時入力を使うため、 <code class="docutils literal notranslate"><span class="pre">type</span></code> 属性に <code class="docutils literal notranslate"><span class="pre">datetime-local</span></code> を指定しています。</p>
+</div>
+</section>
+<section id="id34">
+<h3>予約フォームを表示するビューを作成<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
+</section>
+<section id="id35">
+<h3>URLを追加<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
+</section>
+<section id="id36">
+<h3>予約フォームへのリンクを会議室一覧に追加<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
+</section>
+</section>
+<section id="id37">
+<h2>ログイン中のユーザーの予約一覧<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h2>
+<section id="id38">
+<h3>ビューの実装<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h3>
+</section>
+<section id="id39">
+<h3>URLを追加<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
+</section>
+</section>
+<section id="id40">
+<h2>追加課題<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h2>
 <p>時間に余裕のある人向けの追加課題です。</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -706,13 +756,27 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </li>
 <li><a class="reference internal" href="#id25">会議室一覧ページを作成</a></li>
 <li><a class="reference internal" href="#id26">ログイン・ログアウト処理を作成</a><ul>
-<li><a class="reference internal" href="#id27">ログイン・ログアウトに関する設定</a></li>
-<li><a class="reference internal" href="#id28">ログアウトのボタンを設置する</a></li>
+<li><a class="reference internal" href="#url">ビューを利用するURLの追加</a></li>
+<li><a class="reference internal" href="#id27">プロジェクトのURLに追加</a></li>
+<li><a class="reference internal" href="#id28">ログイン・ログアウトに関する設定</a></li>
+<li><a class="reference internal" href="#id29">ログアウトのボタンを設置する</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id29">会議室一覧をログインユーザーのみに制限</a></li>
-<li><a class="reference internal" href="#id30">会議室一覧で会員種別による表示制御</a></li>
-<li><a class="reference internal" href="#id31">追加課題</a></li>
+<li><a class="reference internal" href="#id30">会議室一覧をログインユーザーのみに制限</a></li>
+<li><a class="reference internal" href="#id31">会議室一覧でユーザー種別による表示制御</a></li>
+<li><a class="reference internal" href="#id32">予約フォームを作成する</a><ul>
+<li><a class="reference internal" href="#id33">フォームの定義</a></li>
+<li><a class="reference internal" href="#id34">予約フォームを表示するビューを作成</a></li>
+<li><a class="reference internal" href="#id35">URLを追加</a></li>
+<li><a class="reference internal" href="#id36">予約フォームへのリンクを会議室一覧に追加</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id37">ログイン中のユーザーの予約一覧</a><ul>
+<li><a class="reference internal" href="#id38">ビューの実装</a></li>
+<li><a class="reference internal" href="#id39">URLを追加</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id40">追加課題</a></li>
 </ul>
 </li>
 </ul>

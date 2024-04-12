@@ -434,6 +434,9 @@ reservation/templates/reservation/index.html:
 ログイン画面は、 ``django.contrib.auth.views.LoginView`` を利用できます。
 ログアウト処理（表示するページは無し）は、 ``django.contrib.auth.views.LogoutView`` を利用できます。
 
+ビューを利用するURLの追加
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 account/urls.py:
 
 .. code-block:: python
@@ -464,6 +467,9 @@ account/templates/registration/login.html:
      <button type="submit">ログイン</button>
    </form>
    {% endblock %}
+
+プロジェクトのURLに追加
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 myproject/urls.py:
 
@@ -551,10 +557,10 @@ account/views.py:
 これで、会議室一覧にアクセスするためにはログインが必要になります。
 ログインしていない場合は、ログイン画面にリダイレクトされます。
 
-会議室一覧で会員種別による表示制御
-----------------------------------------
+会議室一覧でユーザー種別による表示制御
+--------------------------------------------
 
-ログインユーザーの会員種別によって、表示する会議室を制御します。
+ログインユーザーのユーザー種別によって、表示する会議室を制御します。
 
 ログインユーザーのユーザープロフィールを取得する関数を作成します。
 
@@ -634,8 +640,53 @@ reservation/views.py:
 
    Viewクラスは、dispatchメソッドを持っています。dispatchメソッドは、リクエストを処理する前に、各種の処理を行うためのメソッドです。
 
-TODO: ...
+予約フォームを作成する
+--------------------------------
 
+フォームの定義
+~~~~~~~~~~~~~~~~~~
+
+予約データを作成するフォームは、 ``forms.ModelForm`` を使います。
+
+reservation/forms.py:
+
+.. code-block:: python
+
+   from django import forms
+
+   from . import models
+
+
+   class ReservationForm(forms.ModelForm):
+       class Meta:
+           model = models.Reservation
+           fields = ["start", "end"]
+           widgets = {
+               "start": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+               "end": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+           }
+
+.. note::
+
+    ``DateTimeInput`` は日時の入力を受け付けるウィジェットです。閲覧したブラウザのローカル日時を使用したブラウザの日時入力を使うため、 ``type`` 属性に ``datetime-local`` を指定しています。
+
+予約フォームを表示するビューを作成
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+URLを追加
+~~~~~~~~~~~~
+
+予約フォームへのリンクを会議室一覧に追加
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ログイン中のユーザーの予約一覧
+--------------------------------
+
+ビューの実装
+~~~~~~~~~~~~~~~~~~
+
+URLを追加
+~~~~~~~~~~~~
 
 追加課題
 --------------------------------
