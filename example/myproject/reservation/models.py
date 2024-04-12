@@ -4,7 +4,8 @@ from account.models import UserType
 
 
 class Room(models.Model):
-    name = models.CharField("部屋名", max_length=50)
+    """会議室"""
+    name = models.CharField("会議室名", max_length=50)
     available_user_type = models.PositiveSmallIntegerField(
         "利用可能ユーザー種別", default=0, choices=UserType.choices
     )
@@ -13,10 +14,11 @@ class Room(models.Model):
         return str(self.name)
 
     class Meta:
-        verbose_name = verbose_name_plural = "部屋"
+        verbose_name = verbose_name_plural = "会議室"
 
 
 class Reservation(models.Model):
+    """予約"""
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     start = models.DateTimeField()

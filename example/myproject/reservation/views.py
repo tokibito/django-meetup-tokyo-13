@@ -1,9 +1,6 @@
 from typing import Any
-from django.db.models.query import QuerySet
 from django.urls import reverse_lazy
 from django.forms import BaseModelForm
-from django.http import HttpRequest
-from django.http.response import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views import generic
@@ -43,7 +40,7 @@ class ReservationView(generic.CreateView):
         kwargs["room"] = self.room
         return super().get_context_data(**kwargs)
 
-    def dispatch(self, request: HttpRequest, room_id: int) -> HttpResponse:
+    def dispatch(self, request, room_id: int):
         user_profile = self.request.user.user_profile
         # ユーザー種別によって利用可能な部屋を絞り込む
         if user_profile.user_type == account_models.UserType.NORMAL:
@@ -55,7 +52,7 @@ class ReservationView(generic.CreateView):
         self.room = get_object_or_404(available_rooms, pk=room_id)
         return super().dispatch(request)
 
-    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+    def form_valid(self, form: BaseModelForm):
         instance = form.save(commit=False)
         instance.room = self.room
         instance.user = self.request.user

@@ -251,11 +251,12 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="k">class</span> <span class="nc">UserType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">IntegerChoices</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ユーザー種別&quot;&quot;&quot;</span>
 
-<span class="n">NORMAL</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;一般&quot;</span>
-<span class="n">ADVANCED</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;上級&quot;</span>
+    <span class="n">NORMAL</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;一般&quot;</span>
+    <span class="n">ADVANCED</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;上級&quot;</span>
 
 
 <span class="k">class</span> <span class="nc">UserProfile</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ユーザープロフィール&quot;&quot;&quot;</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span>
         <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">,</span>
         <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
@@ -308,10 +309,80 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>TODO: ...</p>
 </section>
 <section id="id23">
-<h2>追加課題<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h2>
+<h2>会議室と予約のモデルを作成<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h2>
+<p>reservation/models.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">account.models</span> <span class="kn">import</span> <span class="n">UserType</span>
+
+
+<span class="k">class</span> <span class="nc">Room</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;会議室&quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="s2">&quot;会議室名&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">available_user_type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveSmallIntegerField</span><span class="p">(</span>
+        <span class="s2">&quot;利用可能ユーザー種別&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">UserType</span><span class="o">.</span><span class="n">choices</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s2">&quot;会議室&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">Reservation</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;予約&quot;&quot;&quot;</span>
+    <span class="n">room</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Room</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">room</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="si">}</span><span class="s2"> by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s2">&quot;予約&quot;</span>
+</pre></div>
+</div>
+<p>ユーザーに紐づくデータは、ForeignKeyでUserモデルを参照しています。</p>
+<p>reservation/admin.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="p">)</span>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Reservation</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="id24">
+<h3>マイグレーション<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py makemigrations reservation
+(venv)$ python manage.py migrate
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id25">
+<h2>会議室一覧ページを作成<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h2>
+<p>reservation/views.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views</span> <span class="kn">import</span> <span class="n">generic</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">models</span>
+
+
+<span class="k">class</span> <span class="nc">RoomListView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/index.html&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">available_rooms</span>
+</pre></div>
+</div>
+<p>TODO: ...</p>
+</section>
+<section id="id26">
+<h2>追加課題<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
 <p>時間に余裕のある人向けの追加課題です。</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -407,7 +478,12 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </ul>
 </li>
 <li><a class="reference internal" href="#reservation">reservationアプリケーションを作成</a></li>
-<li><a class="reference internal" href="#id23">追加課題</a></li>
+<li><a class="reference internal" href="#id23">会議室と予約のモデルを作成</a><ul>
+<li><a class="reference internal" href="#id24">マイグレーション</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id25">会議室一覧ページを作成</a></li>
+<li><a class="reference internal" href="#id26">追加課題</a></li>
 </ul>
 </li>
 </ul>

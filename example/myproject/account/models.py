@@ -10,6 +10,7 @@ class UserType(models.IntegerChoices):
 
 
 class UserProfile(models.Model):
+    """ユーザープロフィール"""
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

@@ -228,11 +228,12 @@ account/models.py:
    class UserType(models.IntegerChoices):
        """ユーザー種別"""
 
-   NORMAL = 1, "一般"
-   ADVANCED = 2, "上級"
+       NORMAL = 1, "一般"
+       ADVANCED = 2, "上級"
 
 
    class UserProfile(models.Model):
+       """ユーザープロフィール"""
        user = models.OneToOneField(
            settings.AUTH_USER_MODEL,
            on_delete=models.CASCADE,
@@ -293,6 +294,84 @@ myproject/settings.py:
        # ...
        "reservation",
    ]
+
+会議室と予約のモデルを作成
+-----------------------------------
+
+reservation/models.py:
+
+.. code-block:: python
+
+   from django.db import models
+   from django.contrib.auth.models import User
+   from account.models import UserType
+
+
+   class Room(models.Model):
+       """会議室"""
+       name = models.CharField("会議室名", max_length=50)
+       available_user_type = models.PositiveSmallIntegerField(
+           "利用可能ユーザー種別", default=0, choices=UserType.choices
+       )
+
+       def __str__(self):
+           return str(self.name)
+
+       class Meta:
+           verbose_name = verbose_name_plural = "会議室"
+
+
+   class Reservation(models.Model):
+       """予約"""
+       room = models.ForeignKey(Room, on_delete=models.CASCADE)
+       user = models.ForeignKey(User, on_delete=models.CASCADE)
+       start = models.DateTimeField()
+       end = models.DateTimeField()
+
+       def __str__(self):
+           return f"{self.room} {self.start} - {self.end} by {self.user}"
+
+       class Meta:
+           verbose_name = verbose_name_plural = "予約"
+
+ユーザーに紐づくデータは、ForeignKeyでUserモデルを参照しています。
+
+reservation/admin.py:
+
+.. code-block:: python
+
+   from django.contrib import admin
+   from . import models
+
+   admin.site.register(models.Room)
+   admin.site.register(models.Reservation)
+
+マイグレーション
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block::
+
+   (venv)$ python manage.py makemigrations reservation
+   (venv)$ python manage.py migrate
+
+会議室一覧ページを作成
+--------------------------------
+
+reservation/views.py:
+
+.. code-block:: python
+
+   from django.views import generic
+   from . import models
+
+
+   class RoomListView(generic.ListView):
+       model = models.Room
+       template_name = "reservation/index.html"
+
+       def get_queryset(self):
+           available_rooms = models.Room.objects.all()
+           return available_rooms
 
 TODO: ...
 
