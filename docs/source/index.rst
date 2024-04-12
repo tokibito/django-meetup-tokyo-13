@@ -89,7 +89,7 @@ https://tokibito.github.io/django-meetup-tokyo-13/
 --------------------------------
 
 Djangoのプロジェクト作成
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 今回は ``myproject`` という名前のプロジェクトで作成します。
 
@@ -100,14 +100,17 @@ Djangoのプロジェクト作成
 
 **以降の説明は、このmyprojectディレクトリ以下を起点とします。**
 
-管理者ユーザーの作成
-~~~~~~~~~~~~~~~~~~~
+言語とタイムゾーンの設定
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-Django管理サイト用のユーザーを作成しておきます。
+myproject/settings.py:
 
-.. code-block::
+言語は日本語、タイムゾーンはAsia/Tokyoに設定します。
 
-   (venv)$ python manage.py createsuperuser
+.. code-block:: python
+
+   LANGUAGE_CODE = "ja"
+   TIME_ZONE = "Asia/Tokyo"
 
 django-debug-toolbarのセットアップ
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -162,17 +165,121 @@ myproject/urls.py:
        path("__debug__/", include("debug_toolbar.urls")),
    ]
 
-これでdjango-debug-toolbarのセットアップまで完了です。初回のDBマイグレーションとrunserverで動作確認してください。
+これでdjango-debug-toolbarのセットアップまで完了です。
+
+初回データベースマイグレーション
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+初回のデータベースマイグレーションを行います。
 
 .. code-block::
 
    (venv)$ python manage.py migrate
+
+管理者ユーザーの作成
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Django管理サイト用のユーザーを作成しておきます。
+
+.. code-block::
+
+   (venv)$ python manage.py createsuperuser
+
+セットアップ状態の動作確認
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+runserverで動作確認してください。
+
+.. code-block::
+
    (venv)$ python manage.py runserver
 
-http://127.0.0.1:8000/ をブラウザで開いて確認します。
+http://127.0.0.1:8000/admin/ をブラウザで開いて確認します。Djangoの管理画面が表示されればOKです。
+
+accountアプリケーションを作成
+------------------------------------
+
+ユーザーの種別と、ユーザープロフィールを先に定義するため、accountアプリケーションを作成します。
+
+.. code-block::
+
+   (venv)$ python manage.py startapp account
+
+myproject/settings.py:
+
+.. code-block:: python
+
+   INSTALLED_APPS = [
+       # ...
+       "account",
+   ]
+
+ユーザー種別の定義とユーザープロフィールのモデルを作成
+--------------------------------------------------------
+
+account/models.py:
+
+.. code-block:: python
+
+   from django.db import models
+   from django.conf import settings
+
+
+   class UserType(models.IntegerChoices):
+       """ユーザー種別"""
+
+   NORMAL = 1, "一般"
+   ADVANCED = 2, "上級"
+
+
+   class UserProfile(models.Model):
+       user = models.OneToOneField(
+           settings.AUTH_USER_MODEL,
+           on_delete=models.CASCADE,
+           verbose_name="ユーザー",
+           related_name="user_profile",
+       )
+       user_type = models.PositiveSmallIntegerField(
+           "ユーザー種別", default=0, choices=UserType.choices
+       )
+
+       def __str__(self):
+           return str(self.user)
+
+       class Meta:
+           verbose_name = verbose_name_plural = "ユーザープロフィール"
+
+account/admin.py:
+
+.. code-block:: python
+
+   from django.contrib import admin
+   from . import models
+
+   admin.site.register(models.UserProfile)
+
+.. note::
+
+   ユーザープロフィールは、ユーザーと1対1の関係であるため、OneToOneFieldを使っています。
+
+   参考: `1対1のリレーションシップ <https://docs.djangoproject.com/ja/5.0/topics/db/examples/one_to_one/>`_
+
+   AUTH_USER_MODELは、settings.pyで指定されたユーザーモデルです。
+
+   デフォルト値: ``"auth.User"``
+
+マイグレーション
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block::
+
+   (venv)$ python manage.py makemigrations account
+   (venv)$ python manage.py migrate
 
 reservationアプリケーションを作成
 ------------------------------------
+
+予約機能のためのreservationアプリケーションを作成します。
 
 .. code-block::
 

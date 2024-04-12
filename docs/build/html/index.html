@@ -148,9 +148,11 @@
 <p><strong>以降の説明は、このmyprojectディレクトリ以下を起点とします。</strong></p>
 </section>
 <section id="id15">
-<h3>管理者ユーザーの作成<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
-<p>Django管理サイト用のユーザーを作成しておきます。</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py createsuperuser
+<h3>言語とタイムゾーンの設定<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<p>myproject/settings.py:</p>
+<p>言語は日本語、タイムゾーンはAsia/Tokyoに設定します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LANGUAGE_CODE</span> <span class="o">=</span> <span class="s2">&quot;ja&quot;</span>
+<span class="n">TIME_ZONE</span> <span class="o">=</span> <span class="s2">&quot;Asia/Tokyo&quot;</span>
 </pre></div>
 </div>
 </section>
@@ -200,16 +202,102 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>これでdjango-debug-toolbarのセットアップまで完了です。初回のDBマイグレーションとrunserverで動作確認してください。</p>
+<p>これでdjango-debug-toolbarのセットアップまで完了です。</p>
+</section>
+<section id="id17">
+<h3>初回データベースマイグレーション<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
+<p>初回のデータベースマイグレーションを行います。</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py migrate
-(venv)$ python manage.py runserver
 </pre></div>
 </div>
-<p><a class="reference external" href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a> をブラウザで開いて確認します。</p>
+</section>
+<section id="id18">
+<h3>管理者ユーザーの作成<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<p>Django管理サイト用のユーザーを作成しておきます。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py createsuperuser
+</pre></div>
+</div>
+</section>
+<section id="id19">
+<h3>セットアップ状態の動作確認<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
+<p>runserverで動作確認してください。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py runserver
+</pre></div>
+</div>
+<p><a class="reference external" href="http://127.0.0.1:8000/admin/">http://127.0.0.1:8000/admin/</a> をブラウザで開いて確認します。Djangoの管理画面が表示されればOKです。</p>
+</section>
+</section>
+<section id="account">
+<h2>accountアプリケーションを作成<a class="headerlink" href="#account" title="Link to this heading">¶</a></h2>
+<p>ユーザーの種別と、ユーザープロフィールを先に定義するため、accountアプリケーションを作成します。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py startapp account
+</pre></div>
+</div>
+<p>myproject/settings.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ...</span>
+    <span class="s2">&quot;account&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="id20">
+<h2>ユーザー種別の定義とユーザープロフィールのモデルを作成<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h2>
+<p>account/models.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<span class="k">class</span> <span class="nc">UserType</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">IntegerChoices</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ユーザー種別&quot;&quot;&quot;</span>
+
+<span class="n">NORMAL</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;一般&quot;</span>
+<span class="n">ADVANCED</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;上級&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">UserProfile</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
+        <span class="n">verbose_name</span><span class="o">=</span><span class="s2">&quot;ユーザー&quot;</span><span class="p">,</span>
+        <span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;user_profile&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">user_type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveSmallIntegerField</span><span class="p">(</span>
+        <span class="s2">&quot;ユーザー種別&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">UserType</span><span class="o">.</span><span class="n">choices</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s2">&quot;ユーザープロフィール&quot;</span>
+</pre></div>
+</div>
+<p>account/admin.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">UserProfile</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ユーザープロフィールは、ユーザーと1対1の関係であるため、OneToOneFieldを使っています。</p>
+<p>参考: <a class="reference external" href="https://docs.djangoproject.com/ja/5.0/topics/db/examples/one_to_one/">1対1のリレーションシップ</a></p>
+<p>AUTH_USER_MODELは、settings.pyで指定されたユーザーモデルです。</p>
+<p>デフォルト値: <code class="docutils literal notranslate"><span class="pre">&quot;auth.User&quot;</span></code></p>
+</div>
+<section id="id22">
+<h3>マイグレーション<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py makemigrations account
+(venv)$ python manage.py migrate
+</pre></div>
+</div>
 </section>
 </section>
 <section id="reservation">
 <h2>reservationアプリケーションを作成<a class="headerlink" href="#reservation" title="Link to this heading">¶</a></h2>
+<p>予約機能のためのreservationアプリケーションを作成します。</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py startapp reservation
 </pre></div>
 </div>
@@ -222,8 +310,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </div>
 <p>TODO: ...</p>
 </section>
-<section id="id17">
-<h2>追加課題<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<section id="id23">
+<h2>追加課題<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h2>
 <p>時間に余裕のある人向けの追加課題です。</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -306,12 +394,20 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </li>
 <li><a class="reference internal" href="#id14">プロジェクトの作成とセットアップ</a><ul>
 <li><a class="reference internal" href="#django">Djangoのプロジェクト作成</a></li>
-<li><a class="reference internal" href="#id15">管理者ユーザーの作成</a></li>
+<li><a class="reference internal" href="#id15">言語とタイムゾーンの設定</a></li>
 <li><a class="reference internal" href="#django-debug-toolbar">django-debug-toolbarのセットアップ</a></li>
+<li><a class="reference internal" href="#id17">初回データベースマイグレーション</a></li>
+<li><a class="reference internal" href="#id18">管理者ユーザーの作成</a></li>
+<li><a class="reference internal" href="#id19">セットアップ状態の動作確認</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#account">accountアプリケーションを作成</a></li>
+<li><a class="reference internal" href="#id20">ユーザー種別の定義とユーザープロフィールのモデルを作成</a><ul>
+<li><a class="reference internal" href="#id22">マイグレーション</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#reservation">reservationアプリケーションを作成</a></li>
-<li><a class="reference internal" href="#id17">追加課題</a></li>
+<li><a class="reference internal" href="#id23">追加課題</a></li>
 </ul>
 </li>
 </ul>
