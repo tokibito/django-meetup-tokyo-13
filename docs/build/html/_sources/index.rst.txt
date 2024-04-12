@@ -476,6 +476,9 @@ myproject/urls.py:
        path("account/", include("account.urls")),
    ]
 
+ログイン・ログアウトに関する設定
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ログイン画面のURL、ログアウト処理のURLは ``settings.py`` で設定します。また、ログイン後、ログアウト後の遷移先のURLも設定します。
 
 myproject/settings.py:
@@ -494,6 +497,142 @@ myproject/settings.py:
 .. note::
 
    このURLの設定はパスを指定するか、URL nameを指定するかのどちらかです。
+
+ログアウトのボタンを設置する
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+base.htmlのcontentブロックの後ろに、ログアウトボタンを設置します。
+
+reservation/templates/base.html:
+
+.. code-block:: html+django
+
+   <html>
+   <head>
+     <title>{% block title %}{% endblock %}</title>
+   </head>
+   <body>
+     {% block content %}{% endblock %}
+     <form action="{% url "logout" %}" method="post">
+       {% csrf_token %}
+       <button type="submit">ログアウト</button>
+     </form>
+   </body>
+
+.. note::
+
+   ログアウト処理を行うLogoutViewは、POSTメソッドでアクセスする必要があるため、formタグを使っています。
+
+会議室一覧をログインユーザーのみに制限
+--------------------------------------------
+
+Viewクラスに対して、ログインを必須としたい場合、LoginRequiredMixinを多重継承で利用します。
+
+account/views.py:
+
+.. code-block:: python
+
+   from django.contrib.auth.mixins import LoginRequiredMixin
+   from django.views import generic
+   from reservation import models
+
+   class RoomListView(generic.ListView, LoginRequiredMixin):
+       model = models.Room
+       template_name = "reservation/index.html"
+
+       def get_queryset(self):
+           available_rooms = models.Room.objects.all()
+           return available_rooms
+
+.. note::
+
+   関数ビューの場合、 ``@login_required`` デコレータを利用できます。
+
+これで、会議室一覧にアクセスするためにはログインが必要になります。
+ログインしていない場合は、ログイン画面にリダイレクトされます。
+
+会議室一覧で会員種別による表示制御
+----------------------------------------
+
+ログインユーザーの会員種別によって、表示する会議室を制御します。
+
+ログインユーザーのユーザープロフィールを取得する関数を作成します。
+
+account/models.py:
+
+.. code-block:: python
+
+   # ...
+   def get_user_profile(user):
+       """ユーザープロフィールを取得する"""
+       try:
+           return user.user_profile
+       except user.__class__.user_profile.RelatedObjectDoesNotExist:
+           pass
+
+.. note::
+
+   OneToOneFieldで参照先のレコードが存在しない場合は、RelatedObjectDoesNotExist例外が発生します。
+   ここでは、例外をキャッチして ``None`` を返すようにしています。
+
+ユーザープロファイルが取得できない場合にエラーを表示するデコレーターを作成します。
+
+account/decorators.py:
+
+.. code-block:: python
+
+   from django.http import HttpResponseForbidden
+   from .models import get_user_profile
+
+
+   def user_profile_required(view_func):
+       def _wrapped_view_func(request, *args, **kwargs):
+           user_profile = get_user_profile(request.user)
+           if not user_profile:
+               return HttpResponseForbidden("ユーザープロフィールがありません")
+           return view_func(request, *args, **kwargs)
+
+       return _wrapped_view_func
+
+.. note::
+
+   デコレーターは、関数を引数に取り、新しい関数を返す関数です。ビュー関数に対して使用するデコレーターは、ビュー関数を引数に取り、新しいビュー関数を返す関数です。
+
+作成したuser_profile_requiredデコレーターをRoomListViewに適用します。このとき、ログインを必須とするチェックはプロファイルのチェックよりも先に行う必要があります。
+
+LoginRequiredMixinでは先に処理を実施できないため、method_decoratorを使ってlogin_requiredデコレーターとuser_profile_requiredデコレーターを適用します。
+
+reservation/views.py:
+
+.. code-block:: python
+
+   from django.contrib.auth.decorators import login_required
+   from django.views import generic
+   from django.utils.decorators import method_decorator
+   from account import models as account_models
+   from account.decorators import user_profile_required
+   from . import models
+
+
+   @method_decorator([login_required, user_profile_required], name="dispatch")
+   class RoomListView(generic.ListView):
+       model = models.Room
+       template_name = "reservation/index.html"
+
+       def get_queryset(self):
+           user_profile = self.request.user.user_profile
+           # ユーザー種別によって利用可能な部屋を絞り込む
+           if user_profile.user_type == account_models.UserType.NORMAL:
+               available_rooms = models.Room.objects.filter(
+                   available_user_type=account_models.UserType.NORMAL
+               )
+           else:
+               available_rooms = models.Room.objects.all()
+           return available_rooms
+
+.. note::
+
+   Viewクラスは、dispatchメソッドを持っています。dispatchメソッドは、リクエストを処理する前に、各種の処理を行うためのメソッドです。
 
 TODO: ...
 

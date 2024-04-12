@@ -464,6 +464,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="p">]</span>
 </pre></div>
 </div>
+<section id="id27">
+<h3>ログイン・ログアウトに関する設定<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
 <p>ログイン画面のURL、ログアウト処理のURLは <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> で設定します。また、ログイン後、ログアウト後の遷移先のURLも設定します。</p>
 <p>myproject/settings.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ログインページのURL</span>
@@ -480,10 +482,129 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p class="admonition-title">注釈</p>
 <p>このURLの設定はパスを指定するか、URL nameを指定するかのどちらかです。</p>
 </div>
+</section>
+<section id="id28">
+<h3>ログアウトのボタンを設置する<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<p>base.htmlのcontentブロックの後ろに、ログアウトボタンを設置します。</p>
+<p>reservation/templates/base.html:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">title</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span><span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+  <span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s2">&quot;logout&quot;</span> <span class="cp">%}</span><span class="s">&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{%</span> <span class="k">csrf_token</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>ログアウト<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ログアウト処理を行うLogoutViewは、POSTメソッドでアクセスする必要があるため、formタグを使っています。</p>
+</div>
+</section>
+</section>
+<section id="id29">
+<h2>会議室一覧をログインユーザーのみに制限<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h2>
+<p>Viewクラスに対して、ログインを必須としたい場合、LoginRequiredMixinを多重継承で利用します。</p>
+<p>account/views.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.mixins</span> <span class="kn">import</span> <span class="n">LoginRequiredMixin</span>
+<span class="kn">from</span> <span class="nn">django.views</span> <span class="kn">import</span> <span class="n">generic</span>
+<span class="kn">from</span> <span class="nn">reservation</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">RoomListView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">,</span> <span class="n">LoginRequiredMixin</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/index.html&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">available_rooms</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>関数ビューの場合、 <code class="docutils literal notranslate"><span class="pre">&#64;login_required</span></code> デコレータを利用できます。</p>
+</div>
+<p>これで、会議室一覧にアクセスするためにはログインが必要になります。
+ログインしていない場合は、ログイン画面にリダイレクトされます。</p>
+</section>
+<section id="id30">
+<h2>会議室一覧で会員種別による表示制御<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
+<p>ログインユーザーの会員種別によって、表示する会議室を制御します。</p>
+<p>ログインユーザーのユーザープロフィールを取得する関数を作成します。</p>
+<p>account/models.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
+<span class="k">def</span> <span class="nf">get_user_profile</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ユーザープロフィールを取得する&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">user_profile</span>
+    <span class="k">except</span> <span class="n">user</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">user_profile</span><span class="o">.</span><span class="n">RelatedObjectDoesNotExist</span><span class="p">:</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>OneToOneFieldで参照先のレコードが存在しない場合は、RelatedObjectDoesNotExist例外が発生します。
+ここでは、例外をキャッチして <code class="docutils literal notranslate"><span class="pre">None</span></code> を返すようにしています。</p>
+</div>
+<p>ユーザープロファイルが取得できない場合にエラーを表示するデコレーターを作成します。</p>
+<p>account/decorators.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseForbidden</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">get_user_profile</span>
+
+
+<span class="k">def</span> <span class="nf">user_profile_required</span><span class="p">(</span><span class="n">view_func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_wrapped_view_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">user_profile</span> <span class="o">=</span> <span class="n">get_user_profile</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_profile</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">(</span><span class="s2">&quot;ユーザープロフィールがありません&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">view_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_wrapped_view_func</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>デコレーターは、関数を引数に取り、新しい関数を返す関数です。ビュー関数に対して使用するデコレーターは、ビュー関数を引数に取り、新しいビュー関数を返す関数です。</p>
+</div>
+<p>作成したuser_profile_requiredデコレーターをRoomListViewに適用します。このとき、ログインを必須とするチェックはプロファイルのチェックよりも先に行う必要があります。</p>
+<p>LoginRequiredMixinでは先に処理を実施できないため、method_decoratorを使ってlogin_requiredデコレーターとuser_profile_requiredデコレーターを適用します。</p>
+<p>reservation/views.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.views</span> <span class="kn">import</span> <span class="n">generic</span>
+<span class="kn">from</span> <span class="nn">django.utils.decorators</span> <span class="kn">import</span> <span class="n">method_decorator</span>
+<span class="kn">from</span> <span class="nn">account</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">account_models</span>
+<span class="kn">from</span> <span class="nn">account.decorators</span> <span class="kn">import</span> <span class="n">user_profile_required</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">models</span>
+
+
+<span class="nd">@method_decorator</span><span class="p">([</span><span class="n">login_required</span><span class="p">,</span> <span class="n">user_profile_required</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dispatch&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">RoomListView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/index.html&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">user_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">user_profile</span>
+        <span class="c1"># ユーザー種別によって利用可能な部屋を絞り込む</span>
+        <span class="k">if</span> <span class="n">user_profile</span><span class="o">.</span><span class="n">user_type</span> <span class="o">==</span> <span class="n">account_models</span><span class="o">.</span><span class="n">UserType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
+            <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">available_user_type</span><span class="o">=</span><span class="n">account_models</span><span class="o">.</span><span class="n">UserType</span><span class="o">.</span><span class="n">NORMAL</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">available_rooms</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>Viewクラスは、dispatchメソッドを持っています。dispatchメソッドは、リクエストを処理する前に、各種の処理を行うためのメソッドです。</p>
+</div>
 <p>TODO: ...</p>
 </section>
-<section id="id27">
-<h2>追加課題<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h2>
+<section id="id31">
+<h2>追加課題<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h2>
 <p>時間に余裕のある人向けの追加課題です。</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -584,8 +705,14 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </ul>
 </li>
 <li><a class="reference internal" href="#id25">会議室一覧ページを作成</a></li>
-<li><a class="reference internal" href="#id26">ログイン・ログアウト処理を作成</a></li>
-<li><a class="reference internal" href="#id27">追加課題</a></li>
+<li><a class="reference internal" href="#id26">ログイン・ログアウト処理を作成</a><ul>
+<li><a class="reference internal" href="#id27">ログイン・ログアウトに関する設定</a></li>
+<li><a class="reference internal" href="#id28">ログアウトのボタンを設置する</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id29">会議室一覧をログインユーザーのみに制限</a></li>
+<li><a class="reference internal" href="#id30">会議室一覧で会員種別による表示制御</a></li>
+<li><a class="reference internal" href="#id31">追加課題</a></li>
 </ul>
 </li>
 </ul>
