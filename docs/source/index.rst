@@ -747,7 +747,7 @@ reservation/urls.py:
    urlpatterns = [
        # ...
        path(
-           "reservation/<int:room_id>/",
+           "<int:room_id>/",
            views.ReservationView.as_view(),
            name="reservation",
        ),

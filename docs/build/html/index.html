@@ -702,7 +702,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
     <span class="c1"># ...</span>
     <span class="n">path</span><span class="p">(</span>
-        <span class="s2">&quot;reservation/&lt;int:room_id&gt;/&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;int:room_id&gt;/&quot;</span><span class="p">,</span>
         <span class="n">views</span><span class="o">.</span><span class="n">ReservationView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(),</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;reservation&quot;</span><span class="p">,</span>
     <span class="p">),</span>
