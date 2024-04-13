@@ -544,7 +544,7 @@ account/views.py:
    from django.views import generic
    from reservation import models
 
-   class RoomListView(generic.ListView, LoginRequiredMixin):
+   class RoomListView(LoginRequiredMixin, generic.ListView):
        model = models.Room
        template_name = "reservation/index.html"
 
