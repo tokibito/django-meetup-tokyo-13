@@ -774,7 +774,7 @@ reservation/views.py:
 
 .. code-block:: python
 
-   class MyReservationListView(generic.ListView, LoginRequiredMixin):
+   class MyReservationListView(LoginRequiredMixin, generic.ListView):
        model = models.Reservation
        template_name = "reservation/my_reservation_list.html"
 

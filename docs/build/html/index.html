@@ -725,7 +725,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <section id="id39">
 <h3>ビューとテンプレートの実装<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
 <p>reservation/views.py:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyReservationListView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">,</span> <span class="n">LoginRequiredMixin</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyReservationListView</span><span class="p">(</span><span class="n">LoginRequiredMixin</span><span class="p">,</span> <span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">):</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Reservation</span>
     <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/my_reservation_list.html&quot;</span>
 
