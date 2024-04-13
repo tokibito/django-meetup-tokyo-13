@@ -873,6 +873,23 @@ account/views.py:
            )
            return response
 
+account/templates/account/register.html:
+
+.. code-block:: html+django
+
+   {% extends "base.html" %}
+   
+   {% block title %}ユーザー登録{% endblock %}
+   
+   {% block content %}
+   <h1>ユーザー登録</h1>
+   <form method="post">
+     {{ form.as_p }}
+     {% csrf_token %}
+     <button type="submit">登録</button>
+   </form>
+   {% endblock %}
+
 URLを追加
 ~~~~~~~~~~~~
 
