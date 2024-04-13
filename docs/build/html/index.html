@@ -772,7 +772,26 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <section id="id41">
 <h2>ユーザー登録画面<a class="headerlink" href="#id41" title="Link to this heading">¶</a></h2>
 <section id="id42">
-<h3>ビューとテンプレートの実装<a class="headerlink" href="#id42" title="Link to this heading">¶</a></h3>
+<h3>ユーザー登録のフォーム<a class="headerlink" href="#id42" title="Link to this heading">¶</a></h3>
+<p>account/forms.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">UserType</span>
+
+
+<span class="k">class</span> <span class="nc">UserRegisterForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="n">user_type</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ユーザー種別&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">UserType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="s2">&quot;user_type&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="id43">
+<h3>ビューとテンプレートの実装<a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
 <p>account/views.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">CreateView</span>
 <span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
@@ -799,8 +818,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </pre></div>
 </div>
 </section>
-<section id="id43">
-<h3>URLを追加<a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
+<section id="id44">
+<h3>URLを追加<a class="headerlink" href="#id44" title="Link to this heading">¶</a></h3>
 <p>account/urls.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
 <span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
@@ -810,8 +829,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </pre></div>
 </div>
 </section>
-<section id="id44">
-<h3>ログイン画面にユーザー登録へのリンクを追加<a class="headerlink" href="#id44" title="Link to this heading">¶</a></h3>
+<section id="id45">
+<h3>ログイン画面にユーザー登録へのリンクを追加<a class="headerlink" href="#id45" title="Link to this heading">¶</a></h3>
 <p>account/templates/registration/login.html:</p>
 <div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span># ...
 <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
@@ -822,8 +841,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </div>
 </section>
 </section>
-<section id="id45">
-<h2>追加課題<a class="headerlink" href="#id45" title="Link to this heading">¶</a></h2>
+<section id="id46">
+<h2>追加課題<a class="headerlink" href="#id46" title="Link to this heading">¶</a></h2>
 <p>時間に余裕のある人向けの追加課題です。</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -947,12 +966,13 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </ul>
 </li>
 <li><a class="reference internal" href="#id41">ユーザー登録画面</a><ul>
-<li><a class="reference internal" href="#id42">ビューとテンプレートの実装</a></li>
-<li><a class="reference internal" href="#id43">URLを追加</a></li>
-<li><a class="reference internal" href="#id44">ログイン画面にユーザー登録へのリンクを追加</a></li>
+<li><a class="reference internal" href="#id42">ユーザー登録のフォーム</a></li>
+<li><a class="reference internal" href="#id43">ビューとテンプレートの実装</a></li>
+<li><a class="reference internal" href="#id44">URLを追加</a></li>
+<li><a class="reference internal" href="#id45">ログイン画面にユーザー登録へのリンクを追加</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id45">追加課題</a></li>
+<li><a class="reference internal" href="#id46">追加課題</a></li>
 </ul>
 </li>
 </ul>
