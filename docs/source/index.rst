@@ -830,7 +830,7 @@ account/forms.py:
 .. code-block:: python
 
    from django import forms
-   from django.conf import settings
+   from django.contrib.auth import get_user_model
    from .models import UserType
    
    
@@ -840,7 +840,7 @@ account/forms.py:
        )
    
        class Meta:
-           model = settings.AUTH_USER_MODEL
+           model = get_user_model()
            fields = ["username", "password", "user_type"]
 
 ビューとテンプレートの実装
