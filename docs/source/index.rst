@@ -536,7 +536,7 @@ reservation/templates/base.html:
 
 Viewクラスに対して、ログインを必須としたい場合、LoginRequiredMixinを多重継承で利用します。
 
-account/views.py:
+reservation/views.py:
 
 .. code-block:: python
 
