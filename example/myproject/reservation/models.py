@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from account.models import UserType
 
 
@@ -21,10 +21,12 @@ class Room(models.Model):
 class Reservation(models.Model):
     """予約"""
 
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    start = models.DateTimeField()
-    end = models.DateTimeField()
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name="会議室")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="予約ユーザー"
+    )
+    start = models.DateTimeField("開始日時")
+    end = models.DateTimeField("終了日時")
 
     def __str__(self):
         return f"{self.room} {self.start} - {self.end} by {self.user}"

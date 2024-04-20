@@ -9,7 +9,4 @@
     <li>{{ room.name }} <a href="{% url "reservation" room_id=room.id %}">予約する</a></li>
   {% endfor %}
 </ul>
-<div>
-  <a href="{% url "my_reservation" %}">自分の予約一覧</a>
-</div>
 {% endblock %}

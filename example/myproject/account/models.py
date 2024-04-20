@@ -33,5 +33,7 @@ def get_user_profile(user):
     """ユーザープロフィールを取得する"""
     try:
         return user.user_profile
-    except user.__class__.user_profile.RelatedObjectDoesNotExist:
+    except (
+        user.__class__.user_profile.RelatedObjectDoesNotExist
+    ):  # user.__class__ は User クラスです。
         pass
