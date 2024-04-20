@@ -225,7 +225,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(venv)$ python manage.py runserver
 </pre></div>
 </div>
-<p><a class="reference external" href="http://127.0.0.1:8000/admin/">http://127.0.0.1:8000/admin/</a> をブラウザで開いて確認します。Djangoの管理画面が表示されればOKです。</p>
+<p><a class="reference external" href="http://127.0.0.1:8000/admin/">http://127.0.0.1:8000/admin/</a> をブラウザで開いて確認します。Djangoの管理サイトが表示されればOKです。</p>
 </section>
 </section>
 <section id="account">
@@ -315,7 +315,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <h2>会議室と予約のモデルを作成<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h2>
 <p>reservation/models.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
-<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span> <span class="nn">account.models</span> <span class="kn">import</span> <span class="n">UserType</span>
 
 
@@ -335,10 +335,10 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 
 <span class="k">class</span> <span class="nc">Reservation</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;予約&quot;&quot;&quot;</span>
-    <span class="n">room</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Room</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
-    <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
-    <span class="n">start</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
-    <span class="n">end</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+    <span class="n">room</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Room</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">verbose_name</span><span class="o">=</span><span class="s2">&quot;会議室&quot;</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">verbose_name</span><span class="o">=</span><span class="s2">&quot;予約ユーザー&quot;</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="s2">&quot;開始日時&quot;</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="s2">&quot;終了日時&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">room</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="si">}</span><span class="s2"> by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -347,7 +347,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
         <span class="n">verbose_name</span> <span class="o">=</span> <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s2">&quot;予約&quot;</span>
 </pre></div>
 </div>
-<p>ユーザーに紐づくデータは、ForeignKeyでUserモデルを参照しています。</p>
+<p>ユーザーに紐づくデータは、ForeignKeyでユーザーモデルを参照しています。</p>
 <p>reservation/admin.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">models</span>
@@ -376,6 +376,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
     <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/index.html&quot;</span>
 
     <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 後ほどユーザー種別による表示制御を追加します</span>
         <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">available_rooms</span>
 </pre></div>
@@ -396,10 +397,15 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 
 <span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
     <span class="c1"># ...</span>
-    <span class="n">path</span><span class="p">(</span><span class="s2">&quot;reservation/&quot;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s2">&quot;reservation.urls&quot;</span><span class="p">)),</span>
+    <span class="n">path</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s2">&quot;reservation.urls&quot;</span><span class="p">)),</span>
 <span class="p">]</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ルートURLにreservationアプリケーションのURLを登録しています。</p>
+</div>
+<p>テンプレートファイルを作成します。</p>
 <p>reservation/templates/base.html:</p>
 <div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
@@ -425,6 +431,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </pre></div>
 </div>
+<p>ここまで作成したら、管理サイトからデータを登録して、表示されるか確認してみてください。</p>
+<p>部屋一覧のページは <a class="reference external" href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a> でアクセスできます。</p>
 </section>
 <section id="id26">
 <h2>ログイン・ログアウト処理を作成<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
@@ -442,7 +450,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>LoginViewのデフォルトテンプレートはregistration/login.htmlです。</p>
+<p>LoginViewのデフォルトテンプレートのテンプレートパスは <code class="docutils literal notranslate"><span class="pre">registration/login.html</span></code> です。今回は <code class="docutils literal notranslate"><span class="pre">account/templates</span></code> 以下にテンプレートファイルを作成します。</p>
 <p>account/templates/registration/login.html:</p>
 <div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span>
 
@@ -477,7 +485,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p>myproject/settings.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ログインページのURL</span>
 <span class="n">LOGIN_URL</span> <span class="o">=</span> <span class="s2">&quot;login&quot;</span>
-<span class="c1"># ログイン後の遷移先のURL</span>
+<span class="c1"># ログイン後の遷移先のURL（ログインページのURLにnextパラメータが指定されていない場合）</span>
 <span class="n">LOGIN_REDIRECT_URL</span> <span class="o">=</span> <span class="s2">&quot;index&quot;</span>
 <span class="c1"># ログアウト処理のURL</span>
 <span class="n">LOGOUT_URL</span> <span class="o">=</span> <span class="s2">&quot;logout&quot;</span>
@@ -500,10 +508,12 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
   <span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
-  <span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s2">&quot;logout&quot;</span> <span class="cp">%}</span><span class="s">&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
-    <span class="cp">{%</span> <span class="k">csrf_token</span> <span class="cp">%}</span>
-    <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>ログアウト<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
-  <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">if</span> <span class="nv">user.is_authenticated</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s2">&quot;logout&quot;</span> <span class="cp">%}</span><span class="s">&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+      <span class="cp">{%</span> <span class="k">csrf_token</span> <span class="cp">%}</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">&gt;</span>ログアウト<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
 </pre></div>
 </div>
@@ -511,10 +521,18 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p class="admonition-title">注釈</p>
 <p>ログアウト処理を行うLogoutViewは、POSTメソッドでアクセスする必要があるため、formタグを使っています。</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>ログイン中の場合、テンプレート上では <code class="docutils literal notranslate"><span class="pre">user</span></code> コンテキストはログインしているユーザーオブジェクトを返し、 <code class="docutils literal notranslate"><span class="pre">user.is_authenticated</span></code> は <code class="docutils literal notranslate"><span class="pre">True</span></code> を返します。</p>
+<p>未ログインの場合、 <code class="docutils literal notranslate"><span class="pre">user</span></code> コンテキストは <code class="docutils literal notranslate"><span class="pre">AnonymousUser</span></code> オブジェクトを返し、 <code class="docutils literal notranslate"><span class="pre">user.is_authenticated</span></code> は <code class="docutils literal notranslate"><span class="pre">False</span></code> を返します。</p>
+<p>参考: <a class="reference external" href="https://docs.djangoproject.com/ja/5.0/topics/auth/default/#authentication-data-in-templates">テンプレート内の認証データ</a></p>
+</div>
+<p>ここまで実装したら、ログインURLとログアウトボタンが動作することを確認してください。</p>
+<p>ログインURLは <a class="reference external" href="http://127.0.0.1:8000/account/login/">http://127.0.0.1:8000/account/login/</a> です。</p>
 </section>
 </section>
-<section id="id30">
-<h2>会議室一覧をログインユーザーのみに制限<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
+<section id="id31">
+<h2>会議室一覧をログインユーザーのみに制限<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h2>
 <p>Viewクラスに対して、ログインを必須としたい場合、LoginRequiredMixinを多重継承で利用します。</p>
 <p>reservation/views.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.mixins</span> <span class="kn">import</span> <span class="n">LoginRequiredMixin</span>
@@ -526,19 +544,22 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
     <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/index.html&quot;</span>
 
     <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 後ほどユーザー種別による表示制御を追加します</span>
         <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">available_rooms</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>関数ビューの場合、 <code class="docutils literal notranslate"><span class="pre">&#64;login_required</span></code> デコレータを利用できます。</p>
+<p>LoginRequiredMixinは、継承する場合には左端に配置します。</p>
+<p>参考: <a class="reference external" href="https://docs.djangoproject.com/ja/5.0/topics/auth/default/#the-loginrequiredmixin-mixin">LoginRequiredMixin mixin</a></p>
+<p>また、関数ビューの場合は <code class="docutils literal notranslate"><span class="pre">&#64;login_required</span></code> デコレータを利用できます。</p>
 </div>
 <p>これで、会議室一覧にアクセスするためにはログインが必要になります。
 ログインしていない場合は、ログイン画面にリダイレクトされます。</p>
 </section>
-<section id="id31">
-<h2>会議室一覧でユーザー種別による表示制御<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h2>
+<section id="id32">
+<h2>会議室一覧でユーザー種別による表示制御<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h2>
 <p>ログインユーザーのユーザー種別によって、表示する会議室を制御します。</p>
 <p>ログインユーザーのユーザープロフィールを取得する関数を作成します。</p>
 <p>account/models.py:</p>
@@ -547,14 +568,14 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ユーザープロフィールを取得する&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">user_profile</span>
-    <span class="k">except</span> <span class="n">user</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">user_profile</span><span class="o">.</span><span class="n">RelatedObjectDoesNotExist</span><span class="p">:</span>
+    <span class="k">except</span> <span class="n">user</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">user_profile</span><span class="o">.</span><span class="n">RelatedObjectDoesNotExist</span><span class="p">:</span>  <span class="c1"># user.__class__ は User クラスです。</span>
         <span class="k">pass</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
 <p>OneToOneFieldで参照先のレコードが存在しない場合は、RelatedObjectDoesNotExist例外が発生します。
-ここでは、例外をキャッチして <code class="docutils literal notranslate"><span class="pre">None</span></code> を返すようにしています。</p>
+ここでは、例外をキャッチして何も返さない、つまり戻り値は <code class="docutils literal notranslate"><span class="pre">None</span></code> になるように実装しています。</p>
 </div>
 <p>ユーザープロファイルが取得できない場合にエラーを表示するデコレーターを作成します。</p>
 <p>account/decorators.py:</p>
@@ -565,6 +586,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="k">def</span> <span class="nf">user_profile_required</span><span class="p">(</span><span class="n">view_func</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">_wrapped_view_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">user_profile</span> <span class="o">=</span> <span class="n">get_user_profile</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="c1"># ユーザープロフィールがない場合は403 Forbiddenエラーを返す</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">user_profile</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">(</span><span class="s2">&quot;ユーザープロフィールがありません&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">view_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -579,7 +601,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p>作成したuser_profile_requiredデコレーターをRoomListViewに適用します。このとき、ログインを必須とするチェックはプロファイルのチェックよりも先に行う必要があります。</p>
 <p>LoginRequiredMixinでは先に処理を実施できないため、method_decoratorを使ってlogin_requiredデコレーターとuser_profile_requiredデコレーターを適用します。</p>
 <p>reservation/views.py:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.mixins</span> <span class="kn">import</span> <span class="n">LoginRequiredMixin</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="kn">import</span> <span class="n">login_required</span>
 <span class="kn">from</span> <span class="nn">django.views</span> <span class="kn">import</span> <span class="n">generic</span>
 <span class="kn">from</span> <span class="nn">django.utils.decorators</span> <span class="kn">import</span> <span class="n">method_decorator</span>
 <span class="kn">from</span> <span class="nn">account</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">account_models</span>
@@ -607,12 +630,15 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
 <p>Viewクラスは、dispatchメソッドを持っています。dispatchメソッドは、リクエストを処理する前に、各種の処理を行うためのメソッドです。</p>
+<p>method_decoratorを使うことで、view関数向けのデコレーターをViewクラスに適用することができます。</p>
 </div>
+<p>ここまで実装したら、ログインしているユーザーのユーザープロフィールがない場合、403 Forbiddenエラーが表示されることを確認してください。</p>
+<p>また、ログインしているユーザーのユーザープロフィールがある場合、ユーザー種別によって表示される会議室が変わることを確認してください。</p>
 </section>
-<section id="id32">
-<h2>予約フォームを作成する<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h2>
 <section id="id33">
-<h3>フォームの定義<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
+<h2>予約フォームを作成する<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h2>
+<section id="id34">
+<h3>フォームの定義<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
 <p>予約データを作成するフォームは、 <code class="docutils literal notranslate"><span class="pre">forms.ModelForm</span></code> を使います。</p>
 <p>reservation/forms.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
@@ -635,8 +661,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <p><code class="docutils literal notranslate"><span class="pre">DateTimeInput</span></code> は日時の入力を受け付けるウィジェットです。閲覧したブラウザのローカル日時を使用したブラウザの日時入力を使うため、 <code class="docutils literal notranslate"><span class="pre">type</span></code> 属性に <code class="docutils literal notranslate"><span class="pre">datetime-local</span></code> を指定しています。</p>
 </div>
 </section>
-<section id="id34">
-<h3>予約フォームを表示するビューを作成<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
+<section id="id35">
+<h3>予約フォームを表示するビューを作成<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
 <p>reservation/views.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
 <span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">reverse_lazy</span>
@@ -650,10 +676,13 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="k">class</span> <span class="nc">ReservationView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">CreateView</span><span class="p">):</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Reservation</span>
     <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/reservation.html&quot;</span>
+    <span class="c1"># フォームクラスを指定</span>
     <span class="n">form_class</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ReservationForm</span>
+    <span class="c1"># 予約完了後の遷移先</span>
     <span class="n">success_url</span> <span class="o">=</span> <span class="n">reverse_lazy</span><span class="p">(</span><span class="s2">&quot;my_reservation&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># テンプレート上で利用するために、部屋情報をコンテキストに追加</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;room&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">room</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -666,19 +695,23 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">available_rooms</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Room</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="c1"># 部屋IDが存在しない場合は404エラーを返す</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">room</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">available_rooms</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">room_id</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">form_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
         <span class="n">instance</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">instance</span><span class="o">.</span><span class="n">room</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">room</span>
+        <span class="c1"># ログイン中のユーザーを予約ユーザーとして登録</span>
         <span class="n">instance</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span>
+        <span class="c1"># CreateViewのform_validメソッドで、instance.save()が呼ばれるので、ここでは呼び出さない</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">form_valid</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>予約後の遷移先である <code class="docutils literal notranslate"><span class="pre">my_reservation</span></code> は、予約一覧を表示するページです。このページはまだ作成していないため、後で作成します。</p>
 </section>
-<section id="id35">
-<h3>テンプレートの作成<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
+<section id="id36">
+<h3>テンプレートの作成<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
 <p>reservation/templates/reservation/reservation.html:</p>
 <div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span>
 
@@ -695,8 +728,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </pre></div>
 </div>
 </section>
-<section id="id36">
-<h3>URLを追加<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
+<section id="id37">
+<h3>URLを追加<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
 <p>reservation/urls.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
 <span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
@@ -710,26 +743,36 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </pre></div>
 </div>
 </section>
-<section id="id37">
-<h3>予約フォームへのリンクを会議室一覧に追加<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
+<section id="id38">
+<h3>予約フォームへのリンクを会議室一覧に追加<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h3>
 <p>reservation/templates/reservation/index.html:</p>
-<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">room</span> <span class="k">in</span> <span class="nv">object_list</span> <span class="cp">%}</span>
-  <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">room.name</span> <span class="cp">}}</span> <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s2">&quot;reservation&quot;</span> <span class="nv">room_id</span><span class="o">=</span><span class="nv">room.id</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span>予約する<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
-<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span>...
+<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">for</span> <span class="nv">room</span> <span class="k">in</span> <span class="nv">object_list</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">room.name</span> <span class="cp">}}</span> <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s2">&quot;reservation&quot;</span> <span class="nv">room_id</span><span class="o">=</span><span class="nv">room.id</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span>予約する<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+  <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+...
 </pre></div>
 </div>
+<p>ここまで実装したら、会議室一覧ページから予約フォームにアクセスできることを確認してください。</p>
+<p><code class="docutils literal notranslate"><span class="pre">my_reservation</span></code> ページを作成しないと、予約完了時にエラーになってしまうので、次に <code class="docutils literal notranslate"><span class="pre">my_reservation</span></code> ページを作成します。</p>
 </section>
 </section>
-<section id="id38">
-<h2>自分の予約一覧<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h2>
 <section id="id39">
-<h3>ビューとテンプレートの実装<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
+<h2>自分の予約一覧<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h2>
+<section id="id40">
+<h3>ビューとテンプレートの実装<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h3>
 <p>reservation/views.py:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyReservationListView</span><span class="p">(</span><span class="n">LoginRequiredMixin</span><span class="p">,</span> <span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.mixins</span> <span class="kn">import</span> <span class="n">LoginRequiredMixin</span>
+<span class="c1"># ...</span>
+<span class="k">class</span> <span class="nc">MyReservationListView</span><span class="p">(</span><span class="n">LoginRequiredMixin</span><span class="p">,</span> <span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">):</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Reservation</span>
     <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;reservation/my_reservation_list.html&quot;</span>
 
     <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 自分の予約一覧を取得する</span>
         <span class="k">return</span> <span class="n">models</span><span class="o">.</span><span class="n">Reservation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -755,8 +798,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </pre></div>
 </div>
 </section>
-<section id="id40">
-<h3>URLを追加<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h3>
+<section id="id41">
+<h3>URLを追加<a class="headerlink" href="#id41" title="Link to this heading">¶</a></h3>
 <p>reservation/urls.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
 <span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
@@ -767,12 +810,14 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <span class="p">]</span>
 </pre></div>
 </div>
+<p>ここまで実装したら、予約フォームから予約を行い、予約一覧ページにアクセスできることを確認してください。</p>
+<p>予約一覧画面は <a class="reference external" href="http://127.0.0.1:8000/my_reservation/">http://127.0.0.1:8000/my_reservation/</a> です。</p>
 </section>
 </section>
-<section id="id41">
-<h2>ユーザー登録画面<a class="headerlink" href="#id41" title="Link to this heading">¶</a></h2>
 <section id="id42">
-<h3>ユーザー登録のフォーム<a class="headerlink" href="#id42" title="Link to this heading">¶</a></h3>
+<h2>ユーザー登録画面<a class="headerlink" href="#id42" title="Link to this heading">¶</a></h2>
+<section id="id43">
+<h3>ユーザー登録のフォーム<a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
 <p>account/forms.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
 <span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">get_user_model</span>
@@ -783,16 +828,22 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
     <span class="n">user_type</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ユーザー種別&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">UserType</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
+    <span class="c1"># パスワード入力はPasswordInputウィジェットを使う</span>
     <span class="n">password</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;パスワード&quot;</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">PasswordInput</span><span class="p">)</span>
 
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="c1"># ユーザーモデルを取得</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">get_user_model</span><span class="p">()</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="s2">&quot;user_type&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">settings.AUTH_USER_MODEL</span></code> は、ユーザーモデルの文字列を返しますが、 <code class="docutils literal notranslate"><span class="pre">get_user_model()</span></code> は、クラスのオブジェクトを返します。</p>
+</div>
 </section>
-<section id="id43">
-<h3>ビューとテンプレートの実装<a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
+<section id="id44">
+<h3>ビューとテンプレートの実装<a class="headerlink" href="#id44" title="Link to this heading">¶</a></h3>
 <p>account/views.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">CreateView</span>
 <span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
@@ -834,8 +885,8 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </pre></div>
 </div>
 </section>
-<section id="id44">
-<h3>URLを追加<a class="headerlink" href="#id44" title="Link to this heading">¶</a></h3>
+<section id="id45">
+<h3>URLを追加<a class="headerlink" href="#id45" title="Link to this heading">¶</a></h3>
 <p>account/urls.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">views</span>
@@ -847,20 +898,23 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </pre></div>
 </div>
 </section>
-<section id="id45">
-<h3>ログイン画面にユーザー登録へのリンクを追加<a class="headerlink" href="#id45" title="Link to this heading">¶</a></h3>
+<section id="id46">
+<h3>ログイン画面にユーザー登録へのリンクを追加<a class="headerlink" href="#id46" title="Link to this heading">¶</a></h3>
 <p>account/templates/registration/login.html:</p>
-<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span># ...
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span>...
 <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
   <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s2">&quot;register&quot;</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span>新規登録<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
 <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 <span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
 </pre></div>
 </div>
+<p>ここまで実装したら、ログイン画面から、新規登録画面にアクセスできることを確認してください。</p>
+<p>また、新規登録画面でユーザー登録を行い、ログイン画面にリダイレクトされ、登録したユーザーでログインできることを確認してください。</p>
+<p>これでユーザー認証が必要な予約フォームアプリケーションが完成しました。</p>
 </section>
 </section>
-<section id="id46">
-<h2>追加課題<a class="headerlink" href="#id46" title="Link to this heading">¶</a></h2>
+<section id="id47">
+<h2>追加課題<a class="headerlink" href="#id47" title="Link to this heading">¶</a></h2>
 <p>時間に余裕のある人向けの追加課題です。</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -898,7 +952,7 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 </li>
 <li><dl class="simple">
 <dt>指定のユーザーに成り代わってログインする</dt><dd><ul>
-<li><p>Djangoの管理画面から特定のユーザーに成り代わってログインをする機能が欲しい場合、django-hijackを利用できます。試してみましょう。</p></li>
+<li><p>Djangoの管理サイトから特定のユーザーに成り代わってログインをする機能が欲しい場合、django-hijackを利用できます。試してみましょう。</p></li>
 </ul>
 </dd>
 </dl>
@@ -968,29 +1022,29 @@ DebugToolbarMiddlewareは、レスポンスのHTMLにscriptタグを差し込む
 <li><a class="reference internal" href="#id29">ログアウトのボタンを設置する</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id30">会議室一覧をログインユーザーのみに制限</a></li>
-<li><a class="reference internal" href="#id31">会議室一覧でユーザー種別による表示制御</a></li>
-<li><a class="reference internal" href="#id32">予約フォームを作成する</a><ul>
-<li><a class="reference internal" href="#id33">フォームの定義</a></li>
-<li><a class="reference internal" href="#id34">予約フォームを表示するビューを作成</a></li>
-<li><a class="reference internal" href="#id35">テンプレートの作成</a></li>
-<li><a class="reference internal" href="#id36">URLを追加</a></li>
-<li><a class="reference internal" href="#id37">予約フォームへのリンクを会議室一覧に追加</a></li>
+<li><a class="reference internal" href="#id31">会議室一覧をログインユーザーのみに制限</a></li>
+<li><a class="reference internal" href="#id32">会議室一覧でユーザー種別による表示制御</a></li>
+<li><a class="reference internal" href="#id33">予約フォームを作成する</a><ul>
+<li><a class="reference internal" href="#id34">フォームの定義</a></li>
+<li><a class="reference internal" href="#id35">予約フォームを表示するビューを作成</a></li>
+<li><a class="reference internal" href="#id36">テンプレートの作成</a></li>
+<li><a class="reference internal" href="#id37">URLを追加</a></li>
+<li><a class="reference internal" href="#id38">予約フォームへのリンクを会議室一覧に追加</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id38">自分の予約一覧</a><ul>
-<li><a class="reference internal" href="#id39">ビューとテンプレートの実装</a></li>
-<li><a class="reference internal" href="#id40">URLを追加</a></li>
+<li><a class="reference internal" href="#id39">自分の予約一覧</a><ul>
+<li><a class="reference internal" href="#id40">ビューとテンプレートの実装</a></li>
+<li><a class="reference internal" href="#id41">URLを追加</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id41">ユーザー登録画面</a><ul>
-<li><a class="reference internal" href="#id42">ユーザー登録のフォーム</a></li>
-<li><a class="reference internal" href="#id43">ビューとテンプレートの実装</a></li>
-<li><a class="reference internal" href="#id44">URLを追加</a></li>
-<li><a class="reference internal" href="#id45">ログイン画面にユーザー登録へのリンクを追加</a></li>
+<li><a class="reference internal" href="#id42">ユーザー登録画面</a><ul>
+<li><a class="reference internal" href="#id43">ユーザー登録のフォーム</a></li>
+<li><a class="reference internal" href="#id44">ビューとテンプレートの実装</a></li>
+<li><a class="reference internal" href="#id45">URLを追加</a></li>
+<li><a class="reference internal" href="#id46">ログイン画面にユーザー登録へのリンクを追加</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id46">追加課題</a></li>
+<li><a class="reference internal" href="#id47">追加課題</a></li>
 </ul>
 </li>
 </ul>

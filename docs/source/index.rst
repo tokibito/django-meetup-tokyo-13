@@ -196,7 +196,7 @@ runserverで動作確認してください。
 
    (venv)$ python manage.py runserver
 
-http://127.0.0.1:8000/admin/ をブラウザで開いて確認します。Djangoの管理画面が表示されればOKです。
+http://127.0.0.1:8000/admin/ をブラウザで開いて確認します。Djangoの管理サイトが表示されればOKです。
 
 accountアプリケーションを作成
 ------------------------------------
@@ -305,7 +305,7 @@ reservation/models.py:
 .. code-block:: python
 
    from django.db import models
-   from django.contrib.auth.models import User
+   from django.conf import settings
    from account.models import UserType
 
 
@@ -325,10 +325,10 @@ reservation/models.py:
 
    class Reservation(models.Model):
        """予約"""
-       room = models.ForeignKey(Room, on_delete=models.CASCADE)
-       user = models.ForeignKey(User, on_delete=models.CASCADE)
-       start = models.DateTimeField()
-       end = models.DateTimeField()
+       room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name="会議室")
+       user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="予約ユーザー")
+       start = models.DateTimeField("開始日時")
+       end = models.DateTimeField("終了日時")
 
        def __str__(self):
            return f"{self.room} {self.start} - {self.end} by {self.user}"
@@ -336,7 +336,7 @@ reservation/models.py:
        class Meta:
            verbose_name = verbose_name_plural = "予約"
 
-ユーザーに紐づくデータは、ForeignKeyでUserモデルを参照しています。
+ユーザーに紐づくデータは、ForeignKeyでユーザーモデルを参照しています。
 
 reservation/admin.py:
 
@@ -372,6 +372,7 @@ reservation/views.py:
        template_name = "reservation/index.html"
 
        def get_queryset(self):
+           # 後ほどユーザー種別による表示制御を追加します
            available_rooms = models.Room.objects.all()
            return available_rooms
 
@@ -398,8 +399,14 @@ myproject/urls.py:
 
    urlpatterns = [
        # ...
-       path("reservation/", include("reservation.urls")),
+       path("", include("reservation.urls")),
    ]
+
+.. note::
+
+   ルートURLにreservationアプリケーションのURLを登録しています。
+
+テンプレートファイルを作成します。
 
 reservation/templates/base.html:
 
@@ -430,6 +437,10 @@ reservation/templates/reservation/index.html:
    </ul>
    {% endblock %}
 
+ここまで作成したら、管理サイトからデータを登録して、表示されるか確認してみてください。
+
+部屋一覧のページは http://127.0.0.1:8000/ でアクセスできます。
+
 ログイン・ログアウト処理を作成
 ----------------------------------------
 
@@ -451,7 +462,7 @@ account/urls.py:
        path("logout/", auth_views.LogoutView.as_view(), name="logout"),
    ]
 
-LoginViewのデフォルトテンプレートはregistration/login.htmlです。
+LoginViewのデフォルトテンプレートのテンプレートパスは ``registration/login.html`` です。今回は ``account/templates`` 以下にテンプレートファイルを作成します。
 
 account/templates/registration/login.html:
 
@@ -495,7 +506,7 @@ myproject/settings.py:
 
    # ログインページのURL
    LOGIN_URL = "login"
-   # ログイン後の遷移先のURL
+   # ログイン後の遷移先のURL（ログインページのURLにnextパラメータが指定されていない場合）
    LOGIN_REDIRECT_URL = "index"
    # ログアウト処理のURL
    LOGOUT_URL = "logout"
@@ -521,15 +532,29 @@ reservation/templates/base.html:
    </head>
    <body>
      {% block content %}{% endblock %}
-     <form action="{% url "logout" %}" method="post">
-       {% csrf_token %}
-       <button type="submit">ログアウト</button>
-     </form>
+     {% if user.is_authenticated %}
+       <form action="{% url "logout" %}" method="post">
+         {% csrf_token %}
+         <button type="submit">ログアウト</button>
+       </form>
+     {% endif %}
    </body>
 
 .. note::
 
    ログアウト処理を行うLogoutViewは、POSTメソッドでアクセスする必要があるため、formタグを使っています。
+
+.. note::
+
+   ログイン中の場合、テンプレート上では ``user`` コンテキストはログインしているユーザーオブジェクトを返し、 ``user.is_authenticated`` は ``True`` を返します。
+
+   未ログインの場合、 ``user`` コンテキストは ``AnonymousUser`` オブジェクトを返し、 ``user.is_authenticated`` は ``False`` を返します。
+
+   参考: `テンプレート内の認証データ <https://docs.djangoproject.com/ja/5.0/topics/auth/default/#authentication-data-in-templates>`_
+
+ここまで実装したら、ログインURLとログアウトボタンが動作することを確認してください。
+
+ログインURLは http://127.0.0.1:8000/account/login/ です。
 
 会議室一覧をログインユーザーのみに制限
 --------------------------------------------
@@ -549,12 +574,17 @@ reservation/views.py:
        template_name = "reservation/index.html"
 
        def get_queryset(self):
+           # 後ほどユーザー種別による表示制御を追加します
            available_rooms = models.Room.objects.all()
            return available_rooms
 
 .. note::
 
-   関数ビューの場合、 ``@login_required`` デコレータを利用できます。
+   LoginRequiredMixinは、継承する場合には左端に配置します。
+
+   参考: `LoginRequiredMixin mixin <https://docs.djangoproject.com/ja/5.0/topics/auth/default/#the-loginrequiredmixin-mixin>`_
+
+   また、関数ビューの場合は ``@login_required`` デコレータを利用できます。
 
 これで、会議室一覧にアクセスするためにはログインが必要になります。
 ログインしていない場合は、ログイン画面にリダイレクトされます。
@@ -575,13 +605,13 @@ account/models.py:
        """ユーザープロフィールを取得する"""
        try:
            return user.user_profile
-       except user.__class__.user_profile.RelatedObjectDoesNotExist:
+       except user.__class__.user_profile.RelatedObjectDoesNotExist:  # user.__class__ は User クラスです。
            pass
 
 .. note::
 
    OneToOneFieldで参照先のレコードが存在しない場合は、RelatedObjectDoesNotExist例外が発生します。
-   ここでは、例外をキャッチして ``None`` を返すようにしています。
+   ここでは、例外をキャッチして何も返さない、つまり戻り値は ``None`` になるように実装しています。
 
 ユーザープロファイルが取得できない場合にエラーを表示するデコレーターを作成します。
 
@@ -596,6 +626,7 @@ account/decorators.py:
    def user_profile_required(view_func):
        def _wrapped_view_func(request, *args, **kwargs):
            user_profile = get_user_profile(request.user)
+           # ユーザープロフィールがない場合は403 Forbiddenエラーを返す
            if not user_profile:
                return HttpResponseForbidden("ユーザープロフィールがありません")
            return view_func(request, *args, **kwargs)
@@ -614,6 +645,7 @@ reservation/views.py:
 
 .. code-block:: python
 
+   from django.contrib.auth.mixins import LoginRequiredMixin
    from django.contrib.auth.decorators import login_required
    from django.views import generic
    from django.utils.decorators import method_decorator
@@ -641,6 +673,12 @@ reservation/views.py:
 .. note::
 
    Viewクラスは、dispatchメソッドを持っています。dispatchメソッドは、リクエストを処理する前に、各種の処理を行うためのメソッドです。
+
+   method_decoratorを使うことで、view関数向けのデコレーターをViewクラスに適用することができます。
+
+ここまで実装したら、ログインしているユーザーのユーザープロフィールがない場合、403 Forbiddenエラーが表示されることを確認してください。
+
+また、ログインしているユーザーのユーザープロフィールがある場合、ユーザー種別によって表示される会議室が変わることを確認してください。
 
 予約フォームを作成する
 --------------------------------
@@ -691,10 +729,13 @@ reservation/views.py:
    class ReservationView(generic.CreateView):
        model = models.Reservation
        template_name = "reservation/reservation.html"
+       # フォームクラスを指定
        form_class = forms.ReservationForm
+       # 予約完了後の遷移先
        success_url = reverse_lazy("my_reservation")
 
        def get_context_data(self, **kwargs):
+           # テンプレート上で利用するために、部屋情報をコンテキストに追加
            kwargs["room"] = self.room
            return super().get_context_data(**kwargs)
 
@@ -707,14 +748,19 @@ reservation/views.py:
                )
            else:
                available_rooms = models.Room.objects.all()
+           # 部屋IDが存在しない場合は404エラーを返す
            self.room = get_object_or_404(available_rooms, pk=room_id)
            return super().dispatch(request)
 
        def form_valid(self, form):
            instance = form.save(commit=False)
            instance.room = self.room
+           # ログイン中のユーザーを予約ユーザーとして登録
            instance.user = self.request.user
+           # CreateViewのform_validメソッドで、instance.save()が呼ばれるので、ここでは呼び出さない
            return super().form_valid(form)
+
+予約後の遷移先である ``my_reservation`` は、予約一覧を表示するページです。このページはまだ作成していないため、後で作成します。
 
 テンプレートの作成
 ~~~~~~~~~~~~~~~~~~~~
@@ -760,9 +806,17 @@ reservation/templates/reservation/index.html:
 
 .. code-block:: html+django
 
-   {% for room in object_list %}
-     <li>{{ room.name }} <a href="{% url "reservation" room_id=room.id %}">予約する</a></li>
-   {% endfor %}
+   ...
+   <ul>
+     {% for room in object_list %}
+       <li>{{ room.name }} <a href="{% url "reservation" room_id=room.id %}">予約する</a></li>
+     {% endfor %}
+   </ul>
+   ...
+
+ここまで実装したら、会議室一覧ページから予約フォームにアクセスできることを確認してください。
+
+``my_reservation`` ページを作成しないと、予約完了時にエラーになってしまうので、次に ``my_reservation`` ページを作成します。
 
 自分の予約一覧
 --------------------
@@ -774,11 +828,15 @@ reservation/views.py:
 
 .. code-block:: python
 
+   # ...
+   from django.contrib.auth.mixins import LoginRequiredMixin
+   # ...
    class MyReservationListView(LoginRequiredMixin, generic.ListView):
        model = models.Reservation
        template_name = "reservation/my_reservation_list.html"
 
        def get_queryset(self):
+           # 自分の予約一覧を取得する
            return models.Reservation.objects.filter(user=self.request.user)
 
 reservation/templates/reservation/my_reservation_list.html:
@@ -819,6 +877,10 @@ reservation/urls.py:
        ),
    ]
 
+ここまで実装したら、予約フォームから予約を行い、予約一覧ページにアクセスできることを確認してください。
+
+予約一覧画面は http://127.0.0.1:8000/my_reservation/ です。
+
 ユーザー登録画面
 --------------------
 
@@ -832,17 +894,23 @@ account/forms.py:
    from django import forms
    from django.contrib.auth import get_user_model
    from .models import UserType
-   
-   
+
+
    class UserRegisterForm(forms.ModelForm):
        user_type = forms.ChoiceField(
            label="ユーザー種別", choices=UserType.choices, required=True
        )
+       # パスワード入力はPasswordInputウィジェットを使う
        password = forms.CharField(label="パスワード", widget=forms.PasswordInput)
-   
+
        class Meta:
+           # ユーザーモデルを取得
            model = get_user_model()
            fields = ["username", "password", "user_type"]
+
+.. note::
+
+   ``settings.AUTH_USER_MODEL`` は、ユーザーモデルの文字列を返しますが、 ``get_user_model()`` は、クラスのオブジェクトを返します。
 
 ビューとテンプレートの実装
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -879,9 +947,9 @@ account/templates/account/register.html:
 .. code-block:: html+django
 
    {% extends "base.html" %}
-   
+
    {% block title %}ユーザー登録{% endblock %}
-   
+
    {% block content %}
    <h1>ユーザー登録</h1>
    <form method="post">
@@ -913,11 +981,17 @@ account/templates/registration/login.html:
 
 .. code-block:: html+django
 
-   # ...
+   ...
    <div>
      <a href="{% url "register" %}">新規登録</a>
    </div>
    {% endblock %}
+
+ここまで実装したら、ログイン画面から、新規登録画面にアクセスできることを確認してください。
+
+また、新規登録画面でユーザー登録を行い、ログイン画面にリダイレクトされ、登録したユーザーでログインできることを確認してください。
+
+これでユーザー認証が必要な予約フォームアプリケーションが完成しました。
 
 追加課題
 --------------------------------
@@ -938,7 +1012,7 @@ account/templates/registration/login.html:
     - メールを送信して、メールに書かれたURLからパスワードを設定する画面を造ります。
     - または、 `django.contrib.auth.views.PasswordResetView` を利用することもできます。
 - 指定のユーザーに成り代わってログインする
-    - Djangoの管理画面から特定のユーザーに成り代わってログインをする機能が欲しい場合、django-hijackを利用できます。試してみましょう。
+    - Djangoの管理サイトから特定のユーザーに成り代わってログインをする機能が欲しい場合、django-hijackを利用できます。試してみましょう。
 - 外部の認証プロバイダーによるログインを実現する
     - django-allauthを使うと、XやGoogle、Facebookなどのアカウントを使ったログインを実現できます。
     - SNS等の場合は、OAuthというプロトコルで外部の認証プロバイダーを利用できます。認証プロトコルはOAuth以外にSAMLなどがあります。
